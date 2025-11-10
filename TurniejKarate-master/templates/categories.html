@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Kategorie i zapisy</h1>
+<p>Wybierz kategorię, do której chcesz się zapisać.</p>
+
+<div class="card">
+  <form method="post">
+    <label for="category_select">Dostępne kategorie:</label>
+    <select name="category_id" id="category_select" required>
+      {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+      {% endfor %}
+    </select>
+    <div style="margin-top:12px">
+      <button type="submit">Zapisz się</button>
+    </div>
+  </form>
+</div>
+
+<p style="margin-top:12px">
+  Chcesz zmienić kategorię? Najpierw <a href="{{ url_for('my_registration') }}">wycofaj swoje aktualne zgłoszenie</a>.
+</p>
+{% endblock %}
