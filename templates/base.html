@@ -22,11 +22,14 @@
 <header>
   <strong>Turniej Karate</strong>
 <nav>
-  <a href="{{ url_for('register') }}">Rejestracja</a>
-  <a href="{{ url_for('login') }}">Logowanie</a>
-  <a href="{{ url_for('profile') }}">Profil</a>
   {% if session.get('user_id') %}
+    <a href="{{ url_for('profile') }}">Profil</a>
+    <a href="{{ url_for('categories') }}">Zapisy</a>
+    <a href="{{ url_for('my_registration') }}">Moje zgłoszenie</a>
     <a href="{{ url_for('logout') }}">Wyloguj</a>
+  {% else %}
+    <a href="{{ url_for('register') }}">Rejestracja</a>
+    <a href="{{ url_for('login') }}">Logowanie</a>
   {% endif %}
 </nav>
 

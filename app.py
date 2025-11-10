@@ -1,30 +1,31 @@
 import os
 from datetime import date
 from dotenv import load_dotenv
-from flask import (
-    Flask, jsonify, request, render_template, redirect, url_for, session, flash
-)
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session, flash
 import psycopg
 
-# --- konfiguracja ---
 load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
 DB_URL = os.getenv("DATABASE_URL")
 SCHEMA = "karate"
 
+
 def get_conn():
     if not DB_URL:
         raise RuntimeError("Brak DATABASE_URL w .env")
     return psycopg.connect(DB_URL, connect_timeout=5)
 
-# landing – pokaż UI
+
+# --- Strona główna ---
 @app.get("/")
 def index():
     if session.get("user_id"):
         return redirect(url_for("profile"))
     return redirect(url_for("register"))
 
+
+# --- Health check ---
 @app.get("/health/db")
 def health_db():
     if not DB_URL:
@@ -37,7 +38,8 @@ def health_db():
     except Exception as e:
         return jsonify(ok=False, error=str(e)), 500
 
-# ---------- REJESTRACJA ----------
+
+# --- Rejestracja ---
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
@@ -47,8 +49,8 @@ def register():
     password = (request.form.get("password") or "").strip()
     country = (request.form.get("country_code") or "").strip().upper()
     first = (request.form.get("first_name") or "").strip()
-    last  = (request.form.get("last_name") or "").strip()
-    sex   = (request.form.get("sex") or "").strip().upper()
+    last = (request.form.get("last_name") or "").strip()
+    sex = (request.form.get("sex") or "").strip().upper()
     birth_raw = (request.form.get("birth_date") or "").strip()
 
     errors = []
@@ -100,7 +102,8 @@ def register():
         flash(f"Błąd podczas rejestracji: {e}", "error")
         return render_template("register.html", form=request.form), 500
 
-# ---------- LOGOWANIE ----------
+
+# --- Logowanie ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -130,7 +133,8 @@ def login():
     flash("Zalogowano.", "success")
     return redirect(url_for("profile"))
 
-# ---------- PROFIL ----------
+
+# --- Profil ---
 @app.get("/profile")
 def profile():
     uid = session.get("user_id")
@@ -163,12 +167,132 @@ def profile():
     }
     return render_template("profile.html", user=user)
 
-# ---------- WYLOGOWANIE ----------
+
+# --- Wylogowanie ---
 @app.get("/logout")
 def logout():
     session.clear()
     flash("Wylogowano.", "success")
     return redirect(url_for("login"))
 
+
+# --- Kategorie i zapisy ---
+@app.route("/categories", methods=["GET", "POST"])
+def categories():
+    uid = session.get("user_id")
+    if not uid:
+        flash("Musisz być zalogowany, aby zobaczyć kategorie.", "error")
+        return redirect(url_for("login"))
+
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
+            row = cur.fetchone()
+            if not row or not row[0]:
+                flash("Nie masz przypisanego kodu zawodnika.", "error")
+                return redirect(url_for("profile"))
+            athlete_code = row[0]
+
+            check_sql = f"SELECT id FROM {SCHEMA}.registrations WHERE athlete_code=%s"
+            cur.execute(check_sql, (athlete_code,))
+            existing_registration = cur.fetchone()
+
+            if existing_registration:
+                flash("Jesteś już zapisany do kategorii. Możesz wycofać swoje zgłoszenie w 'Moje zgłoszenie'.", "info")
+                return redirect(url_for("my_registration"))
+
+            if request.method == "POST":
+                category_id = request.form.get("category_id")
+                if not category_id:
+                    flash("Nie wybrano kategorii.", "error")
+                    return redirect(url_for("categories"))
+
+                insert_sql = f"INSERT INTO {SCHEMA}.registrations (athlete_code, category_id) VALUES (%s, %s)"
+                cur.execute(insert_sql, (athlete_code, category_id))
+                conn.commit()
+
+                flash("Zostałeś pomyślnie zapisany na zawody!", "success")
+                return redirect(url_for("my_registration"))
+
+            cur.execute(f"SELECT id, name FROM {SCHEMA}.categories ORDER BY name")
+            all_categories_raw = cur.fetchall()
+            all_categories = [{"id": row[0], "name": row[1]} for row in all_categories_raw]
+
+            return render_template("categories.html", categories=all_categories)
+
+    except psycopg.errors.UniqueViolation:
+        flash("Błąd: Jesteś już zapisany (UniqueViolation).", "error")
+        return redirect(url_for("my_registration"))
+    except Exception as e:
+        flash(f"Wystąpił błąd bazy danych: {e}", "error")
+        return redirect(url_for("profile"))
+
+
+# --- Moje zgłoszenie ---
+@app.get("/my-registration")
+def my_registration():
+    uid = session.get("user_id")
+    if not uid:
+        flash("Musisz być zalogowany, aby zobaczyć swoje zgłoszenie.", "error")
+        return redirect(url_for("login"))
+
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
+            row = cur.fetchone()
+            if not row or not row[0]:
+                flash("Nie masz przypisanego kodu zawodnika.", "error")
+                return redirect(url_for("profile"))
+            athlete_code = row[0]
+
+            sql = f"""
+                SELECT r.id, c.name
+                FROM {SCHEMA}.registrations r
+                JOIN {SCHEMA}.categories c ON r.category_id = c.id
+                WHERE r.athlete_code = %s
+            """
+            cur.execute(sql, (athlete_code,))
+            row = cur.fetchone()
+
+            reg_data = None
+            if row:
+                reg_data = {"reg_id": row[0], "category_name": row[1]}
+
+            return render_template("my_registration.html", registration=reg_data)
+    except Exception as e:
+        flash(f"Błąd podczas pobierania zgłoszenia: {e}", "error")
+        return redirect(url_for("profile"))
+
+
+# --- Wycofanie zgłoszenia ---
+@app.post("/withdraw")
+def withdraw():
+    uid = session.get("user_id")
+    if not uid:
+        flash("Brak sesji.", "error")
+        return redirect(url_for("login"))
+
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
+            row = cur.fetchone()
+            if not row or not row[0]:
+                flash("Nie masz przypisanego kodu zawodnika.", "error")
+                return redirect(url_for("profile"))
+            athlete_code = row[0]
+
+            sql = f"DELETE FROM {SCHEMA}.registrations WHERE athlete_code = %s"
+            cur.execute(sql, (athlete_code,))
+            conn.commit()
+
+            flash("Twoje zgłoszenie zostało wycofane.", "success")
+            return redirect(url_for("categories"))
+
+    except Exception as e:
+        flash(f"Błąd podczas wycofywania zgłoszenia: {e}", "error")
+        return redirect(url_for("my_registration"))
+
+
+# --- Start aplikacji ---
 if __name__ == "__main__":
     app.run(debug=True)
