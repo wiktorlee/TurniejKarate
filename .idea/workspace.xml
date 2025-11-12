@@ -8,20 +8,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/TurniejKarate.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TurniejKarate.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/app.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/categories.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/my_registration.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master/templates/register.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +58,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
         <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
@@ -88,6 +78,12 @@
       <workItem from="1762680873133" duration="40000" />
       <workItem from="1762724022035" duration="764000" />
       <workItem from="1762724945671" duration="6000" />
+      <workItem from="1762778997606" duration="128000" />
+      <workItem from="1762779180350" duration="54000" />
+      <workItem from="1762779440480" duration="479000" />
+      <workItem from="1762859262427" duration="10000" />
+      <workItem from="1762861343623" duration="528000" />
+      <workItem from="1762937024014" duration="2510000" />
     </task>
     <servers />
   </component>
@@ -95,6 +91,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1762939358804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TurniejKarate$app.coverage" NAME="app Coverage Results" MODIFIED="1762547494497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

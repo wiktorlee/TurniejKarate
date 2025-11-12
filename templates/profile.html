@@ -1,15 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Profil</h1>
+
 {% if user %}
-  <div class="card">
+  <div class="card" style="padding: 15px; max-width: 500px;">
     <p><b>Login:</b> {{ user.login }}</p>
     <p><b>Kraj:</b> {{ user.country_code }}</p>
     <p><b>Imię i nazwisko:</b> {{ user.first_name or '' }} {{ user.last_name or '' }}</p>
-    <p><b>Płeć:</b> {{ user.sex }}</p>
-    <p><b>Data urodzenia:</b> {{ user.birth_date }}</p>
-    <p><b>Athlete code:</b> {{ user.athlete_code }}</p>
+    <p><b>Płeć:</b>
+      {% if user.sex == "M" %}
+        Mężczyzna
+      {% elif user.sex == "F" %}
+        Kobieta
+      {% else %}
+        Brak danych
+      {% endif %}
+    </p>
+    <p><b>Data urodzenia:</b>
+      {% if user.birth_date %}
+        {{ user.birth_date.strftime("%Y-%m-%d") }}
+      {% else %}
+        Brak danych
+      {% endif %}
+    </p>
+    <p><b>Waga:</b>
+      {% if user.weight %}
+        {{ "%.1f"|format(user.weight) }} kg
+      {% else %}
+        Brak danych
+      {% endif %}
+    </p>
+    <p><b>Kod zawodnika:</b>
+      {% if user.athlete_code %}
+        {{ user.athlete_code }}
+      {% else %}
+        <i>Nie nadano jeszcze</i>
+      {% endif %}
+    </p>
   </div>
+
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('categories') }}" class="btn btn-primary">Zapisz się na zawody</a>
+    <a href="{{ url_for('my_registration') }}" class="btn btn-outline-secondary">Moje zgłoszenie</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">Wyloguj</a>
+  </div>
+
 {% else %}
   <p>Brak danych użytkownika.</p>
 {% endif %}

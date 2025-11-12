@@ -17,7 +17,7 @@ def get_conn():
     return psycopg.connect(DB_URL, connect_timeout=5)
 
 
-# --- Strona główna ---
+
 @app.get("/")
 def index():
     if session.get("user_id"):
@@ -25,7 +25,7 @@ def index():
     return redirect(url_for("register"))
 
 
-# --- Health check ---
+# Health check
 @app.get("/health/db")
 def health_db():
     if not DB_URL:
@@ -39,7 +39,7 @@ def health_db():
         return jsonify(ok=False, error=str(e)), 500
 
 
-# --- Rejestracja ---
+# Rejestracja
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
@@ -52,6 +52,7 @@ def register():
     last = (request.form.get("last_name") or "").strip()
     sex = (request.form.get("sex") or "").strip().upper()
     birth_raw = (request.form.get("birth_date") or "").strip()
+    weight_raw = (request.form.get("weight") or "").strip()
 
     errors = []
     if not login:
@@ -63,6 +64,7 @@ def register():
     if sex not in ("M", "F"):
         errors.append("Płeć musi być M lub F.")
 
+    # data urodzenia
     birth_date = None
     if birth_raw:
         try:
@@ -75,6 +77,18 @@ def register():
     else:
         errors.append("Data urodzenia jest wymagana.")
 
+    # waga
+    weight = None
+    if weight_raw:
+        try:
+            weight = float(weight_raw)
+            if weight <= 0:
+                errors.append("Waga musi być dodatnia.")
+        except ValueError:
+            errors.append("Niepoprawny format wagi.")
+    else:
+        errors.append("Podaj wagę.")
+
     if errors:
         for e in errors:
             flash(e, "error")
@@ -82,13 +96,13 @@ def register():
 
     insert_sql = f"""
         INSERT INTO {SCHEMA}.users
-        (login, password, country_code, first_name, last_name, sex, birth_date)
-        VALUES (%s,%s,%s,%s,%s,%s,%s)
+        (login, password, country_code, first_name, last_name, sex, birth_date, weight)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         RETURNING id
     """
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            cur.execute(insert_sql, (login, password, country, first, last, sex, birth_date))
+            cur.execute(insert_sql, (login, password, country, first, last, sex, birth_date, weight))
             user_id = cur.fetchone()[0]
         session.clear()
         session["user_id"] = user_id
@@ -103,7 +117,7 @@ def register():
         return render_template("register.html", form=request.form), 500
 
 
-# --- Logowanie ---
+# Logowanie
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -134,7 +148,7 @@ def login():
     return redirect(url_for("profile"))
 
 
-# --- Profil ---
+# Profil
 @app.get("/profile")
 def profile():
     uid = session.get("user_id")
@@ -143,7 +157,7 @@ def profile():
         return redirect(url_for("login"))
 
     sql = f"""
-        SELECT id, login, country_code, first_name, last_name, sex, birth_date, athlete_code
+        SELECT id, login, country_code, first_name, last_name, sex, birth_date, weight, athlete_code
         FROM {SCHEMA}.users
         WHERE id=%s
     """
@@ -163,12 +177,13 @@ def profile():
         "last_name": row[4],
         "sex": row[5],
         "birth_date": row[6],
-        "athlete_code": row[7],
+        "weight": row[7],
+        "athlete_code": row[8],
     }
     return render_template("profile.html", user=user)
 
 
-# --- Wylogowanie ---
+# Wylogowanie
 @app.get("/logout")
 def logout():
     session.clear()
@@ -176,7 +191,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# --- Kategorie i zapisy ---
+#Kategorie i zapisy
 @app.route("/categories", methods=["GET", "POST"])
 def categories():
     uid = session.get("user_id")
@@ -193,13 +208,12 @@ def categories():
                 return redirect(url_for("profile"))
             athlete_code = row[0]
 
-            check_sql = f"SELECT id FROM {SCHEMA}.registrations WHERE athlete_code=%s"
-            cur.execute(check_sql, (athlete_code,))
-            existing_registration = cur.fetchone()
-
-            if existing_registration:
+            #czy już jest zgłoszenie
+            cur.execute(f"SELECT id FROM {SCHEMA}.registrations WHERE athlete_code=%s", (athlete_code,))
+            if cur.fetchone():
                 flash("Jesteś już zapisany do kategorii. Możesz wycofać swoje zgłoszenie w 'Moje zgłoszenie'.", "info")
                 return redirect(url_for("my_registration"))
+
 
             if request.method == "POST":
                 category_id = request.form.get("category_id")
@@ -207,18 +221,61 @@ def categories():
                     flash("Nie wybrano kategorii.", "error")
                     return redirect(url_for("categories"))
 
-                insert_sql = f"INSERT INTO {SCHEMA}.registrations (athlete_code, category_id) VALUES (%s, %s)"
-                cur.execute(insert_sql, (athlete_code, category_id))
-                conn.commit()
+                # dane zawodnika
+                cur.execute(f"SELECT sex, birth_date, weight FROM {SCHEMA}.users WHERE id=%s", (uid,))
+                user_data = cur.fetchone()
+                if not user_data:
+                    flash("Nie znaleziono danych użytkownika.", "error")
+                    return redirect(url_for("categories"))
+                user_sex, birth_date, weight = user_data
 
+                # dane kategorii
+                cur.execute(f"""
+                    SELECT name, sex, min_age, max_age, min_weight, max_weight
+                    FROM {SCHEMA}.categories
+                    WHERE id = %s
+                """, (category_id,))
+                cat = cur.fetchone()
+                if not cat:
+                    flash("Nie znaleziono kategorii.", "error")
+                    return redirect(url_for("categories"))
+                cat_name, cat_sex, min_age, max_age, min_weight, max_weight = cat
+
+                # Walidacje
+                # płeć
+                if user_sex != cat_sex:
+                    flash(f"Nie możesz zapisać się do kategorii {cat_name} (inna płeć).", "error")
+                    return redirect(url_for("categories"))
+
+                # wiek
+                today = date.today()
+                age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+                if min_age and age < min_age:
+                    flash(f"Za młody do tej kategorii ({age} lat, wymagane min {min_age}).", "error")
+                    return redirect(url_for("categories"))
+                if max_age and age > max_age:
+                    flash(f"Za stary do tej kategorii ({age} lat, dopuszczalne max {max_age}).", "error")
+                    return redirect(url_for("categories"))
+
+                # waga
+                if min_weight and weight < min_weight:
+                    flash(f"Za lekki na tę kategorię (min {min_weight} kg).", "error")
+                    return redirect(url_for("categories"))
+                if max_weight and weight > max_weight:
+                    flash(f"Za ciężki na tę kategorię (max {max_weight} kg).", "error")
+                    return redirect(url_for("categories"))
+
+                # zapis jeśli wszystko OK
+                cur.execute(f"INSERT INTO {SCHEMA}.registrations (athlete_code, category_id) VALUES (%s, %s)",
+                            (athlete_code, category_id))
+                conn.commit()
                 flash("Zostałeś pomyślnie zapisany na zawody!", "success")
                 return redirect(url_for("my_registration"))
 
+            # GET → lista kategorii
             cur.execute(f"SELECT id, name FROM {SCHEMA}.categories ORDER BY name")
-            all_categories_raw = cur.fetchall()
-            all_categories = [{"id": row[0], "name": row[1]} for row in all_categories_raw]
-
-            return render_template("categories.html", categories=all_categories)
+            cats = [{"id": r[0], "name": r[1]} for r in cur.fetchall()]
+            return render_template("categories.html", categories=cats)
 
     except psycopg.errors.UniqueViolation:
         flash("Błąd: Jesteś już zapisany (UniqueViolation).", "error")
@@ -228,7 +285,7 @@ def categories():
         return redirect(url_for("profile"))
 
 
-# --- Moje zgłoszenie ---
+# Moje zgłoszenie
 @app.get("/my-registration")
 def my_registration():
     uid = session.get("user_id")
@@ -264,7 +321,7 @@ def my_registration():
         return redirect(url_for("profile"))
 
 
-# --- Wycofanie zgłoszenia ---
+# Wycofanie zgłoszenia
 @app.post("/withdraw")
 def withdraw():
     uid = session.get("user_id")
@@ -281,10 +338,8 @@ def withdraw():
                 return redirect(url_for("profile"))
             athlete_code = row[0]
 
-            sql = f"DELETE FROM {SCHEMA}.registrations WHERE athlete_code = %s"
-            cur.execute(sql, (athlete_code,))
+            cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE athlete_code = %s", (athlete_code,))
             conn.commit()
-
             flash("Twoje zgłoszenie zostało wycofane.", "success")
             return redirect(url_for("categories"))
 
@@ -293,6 +348,6 @@ def withdraw():
         return redirect(url_for("my_registration"))
 
 
-# --- Start aplikacji ---
+
 if __name__ == "__main__":
     app.run(debug=True)
