@@ -40,9 +40,9 @@
   </div>
 
   <div style="margin-top: 20px;">
-    <a href="{{ url_for('categories') }}" class="btn btn-primary">Zapisz się na zawody</a>
-    <a href="{{ url_for('my_registration') }}" class="btn btn-outline-secondary">Moje zgłoszenie</a>
-    <a href="{{ url_for('logout') }}" class="btn btn-danger">Wyloguj</a>
+    <a href="{{ url_for('categories.categories') }}" class="btn btn-primary">Zapisz się na zawody</a>
+    <a href="{{ url_for('registration.my_registration') }}" class="btn btn-outline-secondary">Moje zgłoszenie</a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Wyloguj</a>
   </div>
 
 {% else %}

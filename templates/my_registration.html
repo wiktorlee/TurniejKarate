@@ -7,13 +7,13 @@
   <p>Jesteś aktualnie zapisany na zawody.</p>
   <p><b>Kategoria:</b> {{ registration.category_name }}</p>
   
-  <form method="post" action="{{ url_for('withdraw') }}" style="margin-top: 16px;">
+  <form method="post" action="{{ url_for('registration.withdraw') }}" style="margin-top: 16px;">
     <p>Aby zmienić kategorię, musisz najpierw wycofać swoje obecne zgłoszenie.</p>
     <button type="submit">Wycofaj zgłoszenie</button>
   </form>
 {% else %}
   <p>Nie jesteś jeszcze zapisany do żadnej kategorii.</p>
-  <a href="{{ url_for('categories') }}">Zapisz się teraz</a>
+  <a href="{{ url_for('categories.categories') }}">Zapisz się teraz</a>
 {% endif %}
 </div>
 {% endblock %}
