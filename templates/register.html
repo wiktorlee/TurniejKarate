@@ -12,6 +12,19 @@
     <label>Kod kraju (3 litery, np. POL)</label>
     <input name="country_code" maxlength="3" required value="{{ form.country_code if form else '' }}">
 
+    <label>Narodowość (np. Polska)</label>
+    <input name="nationality" required value="{{ form.nationality if form else '' }}">
+
+    <label>Klub</label>
+    <select name="club_name" required>
+      <option value="">-- Wybierz klub --</option>
+      {% for club in clubs %}
+        <option value="{{ club.name }}" {% if form and form.club_name == club.name %}selected{% endif %}>
+          {{ club.name }}{% if club.city %} - {{ club.city }}{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+
     <label>Imię</label>
     <input name="first_name" value="{{ form.first_name if form else '' }}">
 

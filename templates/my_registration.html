@@ -4,13 +4,44 @@
 
 <div class="card">
 {% if registration %}
-  <p>Jesteś aktualnie zapisany na zawody.</p>
-  <p><b>Kategoria:</b> {{ registration.category_name }}</p>
+  <p><b>Event:</b> {{ registration.event_name or 'Brak' }}</p>
   
-  <form method="post" action="{{ url_for('registration.withdraw') }}" style="margin-top: 16px;">
-    <p>Aby zmienić kategorię, musisz najpierw wycofać swoje obecne zgłoszenie.</p>
-    <button type="submit">Wycofaj zgłoszenie</button>
+  <div style="margin-top: 16px;">
+    {% if registration.kata_name %}
+      <div style="margin-bottom: 12px; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+        <p><b>Kata:</b> {{ registration.kata_name }}</p>
+        <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline;">
+          <input type="hidden" name="discipline_type" value="kata">
+          <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+            Wycofaj z Kata
+          </button>
+        </form>
+      </div>
+    {% endif %}
+    
+    {% if registration.kumite_name %}
+      <div style="margin-bottom: 12px; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+        <p><b>Kumite:</b> {{ registration.kumite_name }}</p>
+        <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline;">
+          <input type="hidden" name="discipline_type" value="kumite">
+          <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+            Wycofaj z Kumite
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+  
+  <form method="post" action="{{ url_for('registration.withdraw') }}" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #ddd;">
+    <p>Aby zmienić zgłoszenie, możesz wycofać całe zgłoszenie lub pojedynczą dyscyplinę powyżej.</p>
+    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      Wycofaj całe zgłoszenie
+    </button>
   </form>
+  
+  <p style="margin-top: 16px;">
+    <a href="{{ url_for('categories.categories') }}">Zmień zgłoszenie</a>
+  </p>
 {% else %}
   <p>Nie jesteś jeszcze zapisany do żadnej kategorii.</p>
   <a href="{{ url_for('categories.categories') }}">Zapisz się teraz</a>

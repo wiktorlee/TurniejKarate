@@ -1,23 +1,91 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Kategorie i zapisy</h1>
-<p>Wybierz kategorię, do której chcesz się zapisać.</p>
+<p>Wybierz event, dyscyplinę i kategorię, do której chcesz się zapisać.</p>
 
 <div class="card">
-  <form method="post">
-    <label for="category_select">Dostępne kategorie:</label>
-    <select name="category_id" id="category_select" required>
-      {% for category in categories %}
-        <option value="{{ category.id }}">{{ category.name }}</option>
+  <form method="post" id="registrationForm">
+    <label for="event_select">Event:</label>
+    <select name="event_id" id="event_select" required>
+      <option value="">-- Wybierz event --</option>
+      {% for event in events %}
+        <option value="{{ event.id }}">{{ event.name }}</option>
       {% endfor %}
     </select>
-    <div style="margin-top:12px">
+
+    <div style="margin-top:16px">
+      <label>Dyscypliny:</label>
+      <div style="margin-top:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="discipline_kata" id="discipline_kata" onchange="toggleKataCategories()">
+          <span>Kata</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px">
+          <input type="checkbox" name="discipline_kumite" id="discipline_kumite" onchange="toggleKumiteCategories()">
+          <span>Kumite</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="kata_section" style="margin-top:16px;display:none">
+      <label for="category_kata_select">Kategoria Kata:</label>
+      <select name="category_kata_id" id="category_kata_select">
+        <option value="">-- Wybierz kategorię --</option>
+        {% for category in categories_kata %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div id="kumite_section" style="margin-top:16px;display:none">
+      <label for="category_kumite_select">Kategoria Kumite:</label>
+      <select name="category_kumite_id" id="category_kumite_select">
+        <option value="">-- Wybierz kategorię --</option>
+        {% for category in categories_kumite %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div style="margin-top:16px">
       <button type="submit">Zapisz się</button>
     </div>
   </form>
 </div>
 
+{% if has_registration %}
 <p style="margin-top:12px">
-  Chcesz zmienić kategorię? Najpierw <a href="{{ url_for('registration.my_registration') }}">wycofaj swoje aktualne zgłoszenie</a>.
+  Masz już zgłoszenie. Możesz je zobaczyć lub zmienić w <a href="{{ url_for('registration.my_registration') }}">Moje zgłoszenie</a>.
 </p>
+{% endif %}
+
+<script>
+function toggleKataCategories() {
+  const checkbox = document.getElementById('discipline_kata');
+  const section = document.getElementById('kata_section');
+  const select = document.getElementById('category_kata_select');
+  if (checkbox.checked) {
+    section.style.display = 'block';
+    select.required = true;
+  } else {
+    section.style.display = 'none';
+    select.required = false;
+    select.value = '';
+  }
+}
+
+function toggleKumiteCategories() {
+  const checkbox = document.getElementById('discipline_kumite');
+  const section = document.getElementById('kumite_section');
+  const select = document.getElementById('category_kumite_select');
+  if (checkbox.checked) {
+    section.style.display = 'block';
+    select.required = true;
+  } else {
+    section.style.display = 'none';
+    select.required = false;
+    select.value = '';
+  }
+}
+</script>
 {% endblock %}

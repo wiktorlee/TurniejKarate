@@ -7,3 +7,7 @@ def get_conn():
         raise RuntimeError("Brak DATABASE_URL w .env")
     return psycopg.connect(DB_URL, connect_timeout=5)
 
+
+
+
+
