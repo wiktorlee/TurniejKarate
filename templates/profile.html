@@ -6,6 +6,8 @@
   <div class="card" style="padding: 15px; max-width: 500px;">
     <p><b>Login:</b> {{ user.login }}</p>
     <p><b>Kraj:</b> {{ user.country_code }}</p>
+    <p><b>Narodowość:</b> {{ user.nationality or 'Brak danych' }}</p>
+    <p><b>Klub:</b> {{ user.club_name or 'Brak danych' }}</p>
     <p><b>Imię i nazwisko:</b> {{ user.first_name or '' }} {{ user.last_name or '' }}</p>
     <p><b>Płeć:</b>
       {% if user.sex == "M" %}
@@ -40,6 +42,7 @@
   </div>
 
   <div style="margin-top: 20px;">
+    <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-primary">Edytuj profil</a>
     <a href="{{ url_for('categories.categories') }}" class="btn btn-primary">Zapisz się na zawody</a>
     <a href="{{ url_for('registration.my_registration') }}" class="btn btn-outline-secondary">Moje zgłoszenie</a>
     <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Wyloguj</a>

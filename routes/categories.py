@@ -103,54 +103,79 @@ def categories():
                         flash(f"Za ciężki na kategorię Kumite {kumite_name} (max {kumite_max_weight} kg).", "error")
                         return redirect(url_for("categories.categories"))
 
-                # Sprawdź czy już jest zgłoszenie
-                cur.execute(f"SELECT id, event_id FROM {SCHEMA}.registrations WHERE athlete_code=%s", (athlete_code,))
+                # Sprawdzenie rejestracji na konkretny event
+                cur.execute(f"SELECT id FROM {SCHEMA}.registrations WHERE athlete_code=%s AND event_id=%s", (athlete_code, event_id))
                 existing = cur.fetchone()
 
-                # Pobierz discipline_id dla Kata lub Kumite
+                # Pobranie discipline_id dla Kata lub Kumite
+                # Jeśli są obie dyscypliny, discipline_id pozostaje NULL (constraint category_consistency)
                 discipline_id = None
-                if discipline_kata and discipline_kumite:
-                    # Jeśli obie dyscypliny, używamy pierwszej znalezionej (można to później poprawić)
+                if discipline_kata and not discipline_kumite:
+                    # Tylko Kata
                     cur.execute(f"SELECT id FROM {SCHEMA}.disciplines WHERE name = 'Kata' LIMIT 1")
                     disc_row = cur.fetchone()
                     if disc_row:
                         discipline_id = disc_row[0]
-                elif discipline_kata:
-                    cur.execute(f"SELECT id FROM {SCHEMA}.disciplines WHERE name = 'Kata' LIMIT 1")
-                    disc_row = cur.fetchone()
-                    if disc_row:
-                        discipline_id = disc_row[0]
-                elif discipline_kumite:
+                elif discipline_kumite and not discipline_kata:
+                    # Tylko Kumite
                     cur.execute(f"SELECT id FROM {SCHEMA}.disciplines WHERE name = 'Kumite' LIMIT 1")
                     disc_row = cur.fetchone()
                     if disc_row:
                         discipline_id = disc_row[0]
+                # Jeśli obie dyscypliny, discipline_id = None (zgodnie z constraint category_consistency)
 
                 if existing:
-                    # Aktualizuj istniejące zgłoszenie
+                    # Aktualizacja istniejącego zgłoszenia na ten sam event
                     reg_id = existing[0]
                     cur.execute(f"""
                         UPDATE {SCHEMA}.registrations
-                        SET event_id = %s, discipline_id = %s, category_kata_id = %s, category_kumite_id = %s
+                        SET discipline_id = %s, category_kata_id = %s, category_kumite_id = %s
                         WHERE id = %s
-                    """, (event_id, discipline_id, category_kata_id if discipline_kata else None, 
+                    """, (discipline_id, category_kata_id if discipline_kata else None, 
                           category_kumite_id if discipline_kumite else None, reg_id))
                     conn.commit()
-                    flash("Zgłoszenie zostało zaktualizowane!", "success")
+                    flash("Zgłoszenie na ten event zostało zaktualizowane!", "success")
                 else:
-                    # Nowe zgłoszenie
-                    cur.execute(f"""
-                        INSERT INTO {SCHEMA}.registrations 
-                        (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (athlete_code, event_id, discipline_id, 
-                          category_kata_id if discipline_kata else None,
-                          category_kumite_id if discipline_kumite else None))
-                    conn.commit()
-                    flash("Zostałeś pomyślnie zapisany na zawody!", "success")
+                    # Jeśli są obie dyscypliny, tworzymy dwie osobne rejestracje (constraint category_consistency)
+                    if discipline_kata and discipline_kumite:
+                        # Rejestracja dla Kata
+                        cur.execute(f"SELECT id FROM {SCHEMA}.disciplines WHERE name = 'Kata' LIMIT 1")
+                        kata_disc_row = cur.fetchone()
+                        kata_discipline_id = kata_disc_row[0] if kata_disc_row else None
+                        
+                        cur.execute(f"""
+                            INSERT INTO {SCHEMA}.registrations 
+                            (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, (athlete_code, event_id, kata_discipline_id, category_kata_id, None))
+                        
+                        # Rejestracja dla Kumite
+                        cur.execute(f"SELECT id FROM {SCHEMA}.disciplines WHERE name = 'Kumite' LIMIT 1")
+                        kumite_disc_row = cur.fetchone()
+                        kumite_discipline_id = kumite_disc_row[0] if kumite_disc_row else None
+                        
+                        cur.execute(f"""
+                            INSERT INTO {SCHEMA}.registrations 
+                            (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, (athlete_code, event_id, kumite_discipline_id, None, category_kumite_id))
+                        
+                        conn.commit()
+                        flash("Zostałeś pomyślnie zapisany na zawody w obu dyscyplinach!", "success")
+                    else:
+                        # Pojedyncza rejestracja dla jednej dyscypliny
+                        cur.execute(f"""
+                            INSERT INTO {SCHEMA}.registrations 
+                            (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, (athlete_code, event_id, discipline_id, 
+                              category_kata_id if discipline_kata else None,
+                              category_kumite_id if discipline_kumite else None))
+                        conn.commit()
+                        flash("Zostałeś pomyślnie zapisany na zawody!", "success")
                 return redirect(url_for("registration.my_registration"))
 
-            # GET → pobierz dane do formularza
+            # GET → pobranie danych do formularza
             cur.execute(f"SELECT id, name FROM {SCHEMA}.events WHERE is_active = true ORDER BY start_date, name")
             events = [{"id": r[0], "name": r[1]} for r in cur.fetchall()]
 
@@ -171,9 +196,10 @@ def categories():
             """, (user_sex,))
             categories_kumite = [{"id": r[0], "name": r[1]} for r in cur.fetchall()]
 
-            # Sprawdź czy już jest zgłoszenie
-            cur.execute(f"SELECT id FROM {SCHEMA}.registrations WHERE athlete_code=%s", (athlete_code,))
-            has_registration = cur.fetchone() is not None
+            # Sprawdzenie liczby rejestracji (dla informacji w UI)
+            cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.registrations WHERE athlete_code=%s", (athlete_code,))
+            registration_count = cur.fetchone()[0]
+            has_registration = registration_count > 0
 
             return render_template("categories.html", 
                                  events=events,
@@ -188,4 +214,3 @@ def categories():
     except Exception as e:
         flash(f"Wystąpił błąd bazy danych: {e}", "error")
         return redirect(url_for("profile.profile"))
-

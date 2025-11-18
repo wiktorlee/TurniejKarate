@@ -5,12 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9f58784-6bfe-47d2-8b0d-8104fdb52216" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/TurniejKarate.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TurniejKarate.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/categories.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/categories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/registration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/my_registration.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/my_registration.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +85,21 @@
       <workItem from="1762779440480" duration="479000" />
       <workItem from="1762859262427" duration="10000" />
       <workItem from="1762861343623" duration="528000" />
-      <workItem from="1762937024014" duration="2510000" />
+      <workItem from="1762937024014" duration="3998000" />
+      <workItem from="1763121404218" duration="261000" />
+      <workItem from="1763121674078" duration="63000" />
+      <workItem from="1763121777623" duration="497000" />
+      <workItem from="1763122296587" duration="1651000" />
+      <workItem from="1763124809365" duration="259000" />
+      <workItem from="1763131288367" duration="171000" />
+      <workItem from="1763200215516" duration="1290000" />
+      <workItem from="1763202240375" duration="782000" />
+      <workItem from="1763390747073" duration="68000" />
+      <workItem from="1763390881641" duration="223000" />
+      <workItem from="1763391122137" duration="583000" />
+      <workItem from="1763391719945" duration="395000" />
+      <workItem from="1763392230227" duration="69000" />
+      <workItem from="1763392718711" duration="604000" />
     </task>
     <servers />
   </component>
@@ -91,7 +107,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1762939358804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1763392232414" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TurniejKarate$app.coverage" NAME="app Coverage Results" MODIFIED="1762547494497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

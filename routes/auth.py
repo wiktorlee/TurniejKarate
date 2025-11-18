@@ -74,7 +74,7 @@ def register():
     else:
         errors.append("Podaj wagę.")
 
-    # klub - sprawdź czy klub istnieje
+    # Weryfikacja istnienia klubu
     if club_name:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT name FROM {SCHEMA}.clubs WHERE name = %s", (club_name,))
