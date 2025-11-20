@@ -1,6 +1,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash
 from database import get_conn
 from config import SCHEMA
+import random
 
 registration_bp = Blueprint('registration', __name__)
 
@@ -164,4 +165,218 @@ def withdraw_discipline():
     except Exception as e:
         flash(f"Błąd podczas wycofywania dyscypliny: {e}", "error")
         return redirect(url_for("registration.my_registration"))
+
+
+#Lista zawodników Kata
+@registration_bp.get("/kata/competitors/<int:event_id>/<int:category_kata_id>")
+def kata_competitors(event_id, category_kata_id):
+    """
+    Wyświetla listę zawodników zapisanych do kategorii Kata.
+    Weryfikuje czy użytkownik jest zalogowany (nie wymaga zapisu do kategorii).
+    """
+    uid = session.get("user_id")
+    if not uid:
+        flash("Musisz być zalogowany.", "error")
+        return redirect(url_for("auth.login"))
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            # Pobierz athlete_code użytkownika (do wyróżnienia w liście)
+            cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
+            user_row = cur.fetchone()
+            user_athlete_code = user_row[0] if user_row and user_row[0] else None
+            
+            # Pobierz informacje o evencie i kategorii
+            cur.execute(f"""
+                SELECT e.name, e.start_date, e.end_date, ck.name
+                FROM {SCHEMA}.events e, {SCHEMA}.categories_kata ck
+                WHERE e.id = %s AND ck.id = %s
+            """, (event_id, category_kata_id))
+            event_cat = cur.fetchone()
+            if not event_cat:
+                flash("Nie znaleziono eventu lub kategorii.", "error")
+                return redirect(url_for("registration.my_registration"))
+            
+            event_name, start_date, end_date, category_name = event_cat
+            
+            # Pobierz listę zawodników
+            cur.execute(f"""
+                SELECT u.athlete_code, u.first_name, u.last_name, 
+                       u.country_code, u.club_name, u.nationality
+                FROM {SCHEMA}.registrations r
+                JOIN {SCHEMA}.users u ON r.athlete_code = u.athlete_code
+                WHERE r.event_id = %s 
+                  AND r.category_kata_id = %s
+                  AND r.category_kata_id IS NOT NULL
+                ORDER BY u.last_name, u.first_name, u.athlete_code
+            """, (event_id, category_kata_id))
+            competitors = cur.fetchall()
+            
+            # Formatuj dane
+            competitors_list = []
+            for row in competitors:
+                is_current_user = (row[0] == user_athlete_code)
+                competitors_list.append({
+                    "athlete_code": row[0],
+                    "first_name": row[1] or "",
+                    "last_name": row[2] or "",
+                    "country_code": row[3],
+                    "club_name": row[4] or "",
+                    "nationality": row[5] or "",
+                    "is_current_user": is_current_user
+                })
+            
+            return render_template("kata_competitors.html",
+                                 event_name=event_name,
+                                 category_name=category_name,
+                                 start_date=start_date,
+                                 end_date=end_date,
+                                 competitors=competitors_list,
+                                 event_id=event_id)
+    except Exception as e:
+        flash(f"Błąd podczas pobierania listy zawodników: {e}", "error")
+        return redirect(url_for("registration.my_registration"))
+
+
+#Drzewko walk Kumite
+@registration_bp.get("/kumite/bracket/<int:event_id>/<int:category_kumite_id>")
+def kumite_bracket(event_id, category_kumite_id):
+    """
+    Wyświetla drzewko walk dla kategorii Kumite.
+    Automatycznie generuje pojedynki jeśli nie istnieją.
+    """
+    uid = session.get("user_id")
+    if not uid:
+        flash("Musisz być zalogowany.", "error")
+        return redirect(url_for("auth.login"))
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            # Pobierz athlete_code użytkownika
+            cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
+            user_row = cur.fetchone()
+            user_athlete_code = user_row[0] if user_row and user_row[0] else None
+            
+            # Pobierz informacje o evencie i kategorii
+            cur.execute(f"""
+                SELECT e.name, e.start_date, e.end_date, ckm.name
+                FROM {SCHEMA}.events e, {SCHEMA}.categories_kumite ckm
+                WHERE e.id = %s AND ckm.id = %s
+            """, (event_id, category_kumite_id))
+            event_cat = cur.fetchone()
+            if not event_cat:
+                flash("Nie znaleziono eventu lub kategorii.", "error")
+                return redirect(url_for("registration.my_registration"))
+            
+            event_name, start_date, end_date, category_name = event_cat
+            
+            # Sprawdź czy istnieją pojedynki dla tej kategorii
+            # Używamy category_kumite_id bezpośrednio (zakładamy że kolumna category_kumite_id istnieje w draw_fight)
+            # Jeśli nie, użyjemy category_id i sprawdzimy czy wskazuje na categories_kumite
+            cur.execute(f"""
+                SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
+                WHERE category_kumite_id = %s AND round_no = 1
+            """, (category_kumite_id,))
+            fights_count = cur.fetchone()[0]
+            
+            # Jeśli brak pojedynków, wygeneruj je
+            if fights_count == 0:
+                _generate_kumite_bracket(conn, cur, event_id, category_kumite_id)
+                # Po wygenerowaniu, pobierz ponownie liczbę
+                cur.execute(f"""
+                    SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
+                    WHERE category_kumite_id = %s AND round_no = 1
+                """, (category_kumite_id,))
+                fights_count = cur.fetchone()[0]
+            
+            # Pobierz pojedynki
+            cur.execute(f"""
+                SELECT df.fight_no, df.red_code, df.blue_code,
+                       u_red.first_name as red_first, u_red.last_name as red_last,
+                       u_red.country_code as red_country, u_red.club_name as red_club,
+                       u_blue.first_name as blue_first, u_blue.last_name as blue_last,
+                       u_blue.country_code as blue_country, u_blue.club_name as blue_club
+                FROM {SCHEMA}.draw_fight df
+                LEFT JOIN {SCHEMA}.users u_red ON df.red_code = u_red.athlete_code
+                LEFT JOIN {SCHEMA}.users u_blue ON df.blue_code = u_blue.athlete_code
+                WHERE df.category_kumite_id = %s 
+                  AND df.round_no = 1
+                ORDER BY df.fight_no
+            """, (category_kumite_id,))
+            fights = cur.fetchall()
+            
+            # Formatuj dane
+            fights_list = []
+            for row in fights:
+                fight_no, red_code, blue_code = row[0], row[1], row[2]
+                is_user_in_fight = (red_code == user_athlete_code or blue_code == user_athlete_code)
+                
+                fights_list.append({
+                    "fight_no": fight_no,
+                    "red_code": red_code,
+                    "blue_code": blue_code,
+                    "red_name": f"{row[3] or ''} {row[4] or ''}".strip() if row[3] or row[4] else "BYE",
+                    "red_country": row[5] or "",
+                    "red_club": row[6] or "",
+                    "blue_name": f"{row[7] or ''} {row[8] or ''}".strip() if row[7] or row[8] else "BYE",
+                    "blue_country": row[9] or "",
+                    "blue_club": row[10] or "",
+                    "is_bye": (blue_code is None),
+                    "is_current_user": is_user_in_fight
+                })
+            
+            return render_template("kumite_bracket.html",
+                                 event_name=event_name,
+                                 category_name=category_name,
+                                 start_date=start_date,
+                                 end_date=end_date,
+                                 fights=fights_list,
+                                 event_id=event_id,
+                                 category_kumite_id=category_kumite_id)
+    except Exception as e:
+        flash(f"Błąd podczas pobierania drzewka walk: {e}", "error")
+        return redirect(url_for("registration.my_registration"))
+
+
+def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
+    """
+    Funkcja pomocnicza do generowania drzewka walk.
+    Losowo przydziela zawodników do pojedynków.
+    """
+    # Pobierz zawodników zapisanych do kategorii
+    cur.execute(f"""
+        SELECT r.athlete_code
+        FROM {SCHEMA}.registrations r
+        WHERE r.event_id = %s 
+          AND r.category_kumite_id = %s
+          AND r.category_kumite_id IS NOT NULL
+        ORDER BY r.athlete_code
+    """, (event_id, category_kumite_id))
+    athletes = [row[0] for row in cur.fetchall()]
+    
+    if len(athletes) < 2:
+        raise ValueError("Za mało zawodników do utworzenia drzewka (min. 2)")
+    
+    # Losowe przydzielenie
+    random.shuffle(athletes)
+    
+    # Jeśli nieparzysta liczba, ostatni zawodnik dostaje BYE
+    if len(athletes) % 2 != 0:
+        athletes.append(None)  # None oznacza BYE
+    
+    # Utwórz pary i wstaw do draw_fight
+    # category_id jest wymagane (NOT NULL), więc używamy category_kumite_id jako wartości
+    fight_no = 1
+    for i in range(0, len(athletes), 2):
+        red_code = athletes[i]
+        blue_code = athletes[i + 1] if i + 1 < len(athletes) else None
+        
+        cur.execute(f"""
+            INSERT INTO {SCHEMA}.draw_fight 
+            (category_id, category_kumite_id, round_no, fight_no, red_code, blue_code)
+            VALUES (%s, %s, 1, %s, %s, %s)
+        """, (category_kumite_id, category_kumite_id, fight_no, red_code, blue_code))
+        fight_no += 1
+    
+    conn.commit()
 

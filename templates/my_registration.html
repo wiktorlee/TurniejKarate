@@ -25,26 +25,38 @@
         {% if reg.kata_name %}
           <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
             <p style="margin: 0;"><b>Kata:</b> {{ reg.kata_name }}</p>
-            <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline; margin-top: 8px;">
-              <input type="hidden" name="registration_id" value="{{ reg.reg_id }}">
-              <input type="hidden" name="discipline_type" value="kata">
-              <button type="submit" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
-                Wycofaj z Kata
-              </button>
-            </form>
+            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="{{ url_for('registration.kata_competitors', event_id=reg.event_id, category_kata_id=reg.category_kata_id) }}" 
+                 style="background: #0a58ca; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; display: inline-block;">
+                Zobacz listę zawodników
+              </a>
+              <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline;">
+                <input type="hidden" name="registration_id" value="{{ reg.reg_id }}">
+                <input type="hidden" name="discipline_type" value="kata">
+                <button type="submit" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+                  Wycofaj z Kata
+                </button>
+              </form>
+            </div>
           </div>
         {% endif %}
         
         {% if reg.kumite_name %}
           <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
             <p style="margin: 0;"><b>Kumite:</b> {{ reg.kumite_name }}</p>
-            <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline; margin-top: 8px;">
-              <input type="hidden" name="registration_id" value="{{ reg.reg_id }}">
-              <input type="hidden" name="discipline_type" value="kumite">
-              <button type="submit" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
-                Wycofaj z Kumite
-              </button>
-            </form>
+            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="{{ url_for('registration.kumite_bracket', event_id=reg.event_id, category_kumite_id=reg.category_kumite_id) }}" 
+                 style="background: #0a58ca; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; display: inline-block;">
+                Zobacz drzewko walk
+              </a>
+              <form method="post" action="{{ url_for('registration.withdraw_discipline') }}" style="display: inline;">
+                <input type="hidden" name="registration_id" value="{{ reg.reg_id }}">
+                <input type="hidden" name="discipline_type" value="kumite">
+                <button type="submit" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+                  Wycofaj z Kumite
+                </button>
+              </form>
+            </div>
           </div>
         {% endif %}
       </div>
