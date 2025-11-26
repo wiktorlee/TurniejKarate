@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="d9f58784-6bfe-47d2-8b0d-8104fdb52216" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PROPOZYCJA_DRZEWEK_WALKI.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/categories.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/categories.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/registration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/my_registration.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/my_registration.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/kata_competitors.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/kata_competitors.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/kumite_bracket.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/kumite_bracket.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,6 +103,12 @@
       <workItem from="1763635171516" duration="754000" />
       <workItem from="1763637691136" duration="91000" />
       <workItem from="1763657570399" duration="12000" />
+      <workItem from="1763660035477" duration="77000" />
+      <workItem from="1763731706101" duration="71000" />
+      <workItem from="1763901482362" duration="1340000" />
+      <workItem from="1763996392522" duration="11000" />
+      <workItem from="1764156654497" duration="38000" />
+      <workItem from="1764164685038" duration="1270000" />
     </task>
     <servers />
   </component>
@@ -109,7 +116,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1763637692845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1764165971219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TurniejKarate$app.coverage" NAME="app Coverage Results" MODIFIED="1762547494497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

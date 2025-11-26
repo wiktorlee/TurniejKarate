@@ -136,31 +136,40 @@ def withdraw_discipline():
             reg_id, kata_id, kumite_id = reg
 
             # Usuwanie wybranej dyscypliny
-            if discipline_type == "kata":
-                if not kata_id:
-                    flash("Nie jesteś zapisany do Kata w tym zgłoszeniu.", "error")
-                    return redirect(url_for("registration.my_registration"))
-                # Usuwanie zgłoszenia przy ostatniej dyscyplinie
-                if not kumite_id:
-                    cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
-                    flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
-                else:
-                    cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kata_id = NULL WHERE id = %s", (reg_id,))
-                    flash("Zostałeś wycofany z Kata.", "success")
-            else:  # kumite
-                if not kumite_id:
-                    flash("Nie jesteś zapisany do Kumite w tym zgłoszeniu.", "error")
-                    return redirect(url_for("registration.my_registration"))
-                # Usuwanie zgłoszenia przy ostatniej dyscyplinie
-                if not kata_id:
-                    cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
-                    flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
-                else:
-                    cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kumite_id = NULL WHERE id = %s", (reg_id,))
-                    flash("Zostałeś wycofany z Kumite.", "success")
+            try:
+                conn.execute("BEGIN")
+                
+                if discipline_type == "kata":
+                    if not kata_id:
+                        conn.rollback()
+                        flash("Nie jesteś zapisany do Kata w tym zgłoszeniu.", "error")
+                        return redirect(url_for("registration.my_registration"))
+                    # Usuwanie zgłoszenia przy ostatniej dyscyplinie
+                    if not kumite_id:
+                        cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
+                        flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
+                    else:
+                        cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kata_id = NULL WHERE id = %s", (reg_id,))
+                        flash("Zostałeś wycofany z Kata.", "success")
+                else:  # kumite
+                    if not kumite_id:
+                        conn.rollback()
+                        flash("Nie jesteś zapisany do Kumite w tym zgłoszeniu.", "error")
+                        return redirect(url_for("registration.my_registration"))
+                    # Usuwanie zgłoszenia przy ostatniej dyscyplinie
+                    if not kata_id:
+                        cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
+                        flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
+                    else:
+                        cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kumite_id = NULL WHERE id = %s", (reg_id,))
+                        flash("Zostałeś wycofany z Kumite.", "success")
 
-            conn.commit()
-            return redirect(url_for("registration.my_registration"))
+                conn.commit()
+                return redirect(url_for("registration.my_registration"))
+            except Exception as e:
+                conn.rollback()
+                flash(f"Błąd podczas wycofywania dyscypliny: {e}", "error")
+                return redirect(url_for("registration.my_registration"))
 
     except Exception as e:
         flash(f"Błąd podczas wycofywania dyscypliny: {e}", "error")
@@ -186,11 +195,12 @@ def kata_competitors(event_id, category_kata_id):
             user_row = cur.fetchone()
             user_athlete_code = user_row[0] if user_row and user_row[0] else None
             
-            # Pobierz informacje o evencie i kategorii
+            # Pobierz informacje o evencie i kategorii z widoku
             cur.execute(f"""
-                SELECT e.name, e.start_date, e.end_date, ck.name
-                FROM {SCHEMA}.events e, {SCHEMA}.categories_kata ck
-                WHERE e.id = %s AND ck.id = %s
+                SELECT DISTINCT event_name, event_start_date, event_end_date, category_name
+                FROM {SCHEMA}.v_kata_competitors
+                WHERE event_id = %s AND category_kata_id = %s
+                LIMIT 1
             """, (event_id, category_kata_id))
             event_cat = cur.fetchone()
             if not event_cat:
@@ -199,16 +209,13 @@ def kata_competitors(event_id, category_kata_id):
             
             event_name, start_date, end_date, category_name = event_cat
             
-            # Pobierz listę zawodników
+            # Pobierz listę zawodników z widoku
             cur.execute(f"""
-                SELECT u.athlete_code, u.first_name, u.last_name, 
-                       u.country_code, u.club_name, u.nationality
-                FROM {SCHEMA}.registrations r
-                JOIN {SCHEMA}.users u ON r.athlete_code = u.athlete_code
-                WHERE r.event_id = %s 
-                  AND r.category_kata_id = %s
-                  AND r.category_kata_id IS NOT NULL
-                ORDER BY u.last_name, u.first_name, u.athlete_code
+                SELECT athlete_code, first_name, last_name, 
+                       country_code, club_name, nationality
+                FROM {SCHEMA}.v_kata_competitors
+                WHERE event_id = %s AND category_kata_id = %s
+                ORDER BY last_name, first_name, athlete_code
             """, (event_id, category_kata_id))
             competitors = cur.fetchall()
             
@@ -257,11 +264,12 @@ def kumite_bracket(event_id, category_kumite_id):
             user_row = cur.fetchone()
             user_athlete_code = user_row[0] if user_row and user_row[0] else None
             
-            # Pobierz informacje o evencie i kategorii
+            # Pobierz informacje o evencie i kategorii z widoku
             cur.execute(f"""
-                SELECT e.name, e.start_date, e.end_date, ckm.name
-                FROM {SCHEMA}.events e, {SCHEMA}.categories_kumite ckm
-                WHERE e.id = %s AND ckm.id = %s
+                SELECT DISTINCT event_name, event_start_date, event_end_date, category_name
+                FROM {SCHEMA}.v_kumite_competitors
+                WHERE event_id = %s AND category_kumite_id = %s
+                LIMIT 1
             """, (event_id, category_kumite_id))
             event_cat = cur.fetchone()
             if not event_cat:
@@ -343,14 +351,12 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     Funkcja pomocnicza do generowania drzewka walk.
     Losowo przydziela zawodników do pojedynków.
     """
-    # Pobierz zawodników zapisanych do kategorii
+    # Pobierz zawodników zapisanych do kategorii z widoku
     cur.execute(f"""
-        SELECT r.athlete_code
-        FROM {SCHEMA}.registrations r
-        WHERE r.event_id = %s 
-          AND r.category_kumite_id = %s
-          AND r.category_kumite_id IS NOT NULL
-        ORDER BY r.athlete_code
+        SELECT athlete_code
+        FROM {SCHEMA}.v_kumite_competitors
+        WHERE event_id = %s AND category_kumite_id = %s
+        ORDER BY athlete_code
     """, (event_id, category_kumite_id))
     athletes = [row[0] for row in cur.fetchall()]
     
@@ -366,17 +372,23 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     
     # Utwórz pary i wstaw do draw_fight
     # category_id jest wymagane (NOT NULL), więc używamy category_kumite_id jako wartości
-    fight_no = 1
-    for i in range(0, len(athletes), 2):
-        red_code = athletes[i]
-        blue_code = athletes[i + 1] if i + 1 < len(athletes) else None
+    try:
+        conn.execute("BEGIN")
         
-        cur.execute(f"""
-            INSERT INTO {SCHEMA}.draw_fight 
-            (category_id, category_kumite_id, round_no, fight_no, red_code, blue_code)
-            VALUES (%s, %s, 1, %s, %s, %s)
-        """, (category_kumite_id, category_kumite_id, fight_no, red_code, blue_code))
-        fight_no += 1
-    
-    conn.commit()
+        fight_no = 1
+        for i in range(0, len(athletes), 2):
+            red_code = athletes[i]
+            blue_code = athletes[i + 1] if i + 1 < len(athletes) else None
+            
+            cur.execute(f"""
+                INSERT INTO {SCHEMA}.draw_fight 
+                (category_id, category_kumite_id, round_no, fight_no, red_code, blue_code)
+                VALUES (%s, %s, 1, %s, %s, %s)
+            """, (category_kumite_id, category_kumite_id, fight_no, red_code, blue_code))
+            fight_no += 1
+        
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise
 
