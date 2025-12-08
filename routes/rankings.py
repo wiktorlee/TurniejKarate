@@ -61,3 +61,4 @@ def show_rankings():
     return render_template("rankings.html",
                            club_ranking=club_ranking,
                            nation_ranking=nation_ranking)
+

@@ -26,8 +26,10 @@
     <a href="{{ url_for('profile.profile') }}">Profil</a>
     <a href="{{ url_for('categories.categories') }}">Zapisy</a>
     <a href="{{ url_for('registration.my_registration') }}">Moje zgłoszenie</a>
+    <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>
     <a href="{{ url_for('auth.logout') }}">Wyloguj</a>
   {% else %}
+    <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>
     <a href="{{ url_for('auth.register') }}">Rejestracja</a>
     <a href="{{ url_for('auth.login') }}">Logowanie</a>
   {% endif %}
