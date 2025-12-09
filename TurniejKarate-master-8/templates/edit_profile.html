@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edytuj profil</h1>
+
+<div class="card">
+  <form method="post">
+    <label>Login (nie można zmienić)</label>
+    <input name="login" value="{{ user.login }}" disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+
+    <label>Kod zawodnika (nie można zmienić)</label>
+    <input name="athlete_code" value="{{ user.athlete_code or 'Nie nadano jeszcze' }}" disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+
+    <label>Kod kraju (3 litery, np. POL)</label>
+    <input name="country_code" maxlength="3" required value="{{ user.country_code or '' }}">
+
+    <label>Narodowość (np. Polska)</label>
+    <input name="nationality" required value="{{ user.nationality or '' }}">
+
+    <label>Klub</label>
+    <select name="club_name" required>
+      <option value="">-- Wybierz klub --</option>
+      {% for club in clubs %}
+        <option value="{{ club.name }}" {% if user.club_name == club.name %}selected{% endif %}>
+          {{ club.name }}{% if club.city %} - {{ club.city }}{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>Imię</label>
+    <input name="first_name" value="{{ user.first_name or '' }}">
+
+    <label>Nazwisko</label>
+    <input name="last_name" value="{{ user.last_name or '' }}">
+
+    <label>Płeć</label>
+    <select name="sex" required>
+      <option value="M" {% if user.sex == 'M' %}selected{% endif %}>Mężczyzna</option>
+      <option value="F" {% if user.sex == 'F' %}selected{% endif %}>Kobieta</option>
+    </select>
+
+    <label>Data urodzenia</label>
+    <input type="date" name="birth_date" required value="{% if user.birth_date %}{{ user.birth_date.strftime('%Y-%m-%d') }}{% endif %}">
+
+    <label>Waga (kg)</label>
+    <input type="number" step="0.1" name="weight" required value="{% if user.weight %}{{ user.weight }}{% endif %}">
+
+    <label>Nowe hasło (opcjonalne - zostaw puste, jeśli nie chcesz zmieniać)</label>
+    <input type="password" name="password" placeholder="Zostaw puste, aby nie zmieniać hasła">
+
+    <div style="margin-top: 16px;">
+      <button type="submit">Zapisz zmiany</button>
+      <a href="{{ url_for('profile.profile') }}" style="margin-left: 12px; text-decoration: none; color: #666;">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+
+
