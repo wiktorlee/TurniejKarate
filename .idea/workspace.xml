@@ -7,32 +7,10 @@
     <list default="true" id="d9f58784-6bfe-47d2-8b0d-8104fdb52216" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/TurniejKarate.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TurniejKarate.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/app.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/database.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/auth.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/categories.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/profile.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/rankings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/routes/registration.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/screenshots/29_10/profil.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/screenshots/29_10/rejestracja.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/categories.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/edit_profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/kata_competitors.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/kumite_bracket.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/my_registration.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/rankings.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TurniejKarate-master-8/templates/register.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/rankings.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/rankings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/registration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/rankings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/rankings.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,6 +59,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
         <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
@@ -133,6 +112,7 @@
       <workItem from="1764164685038" duration="1563000" />
       <workItem from="1764505220864" duration="14000" />
       <workItem from="1765213930060" duration="320000" />
+      <workItem from="1765280279318" duration="571000" />
     </task>
     <servers />
   </component>
@@ -140,7 +120,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1765213938874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1765280828596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TurniejKarate$app.coverage" NAME="app Coverage Results" MODIFIED="1762547494497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -24,16 +24,12 @@ def my_registration():
             athlete_code = row[0]
 
             sql = f"""
-                SELECT r.id, r.event_id, r.category_kata_id, r.category_kumite_id,
-                       e.name as event_name, e.start_date, e.end_date,
-                       ck.name as kata_name,
-                       ckm.name as kumite_name
-                FROM {SCHEMA}.registrations r
-                LEFT JOIN {SCHEMA}.events e ON r.event_id = e.id
-                LEFT JOIN {SCHEMA}.categories_kata ck ON r.category_kata_id = ck.id
-                LEFT JOIN {SCHEMA}.categories_kumite ckm ON r.category_kumite_id = ckm.id
-                WHERE r.athlete_code = %s
-                ORDER BY e.start_date, e.name
+                SELECT id, event_id, category_kata_id, category_kumite_id,
+                       event_name, start_date, end_date,
+                       kata_name, kumite_name
+                FROM {SCHEMA}.v_user_registrations
+                WHERE athlete_code = %s
+                ORDER BY start_date, event_name
             """
             cur.execute(sql, (athlete_code,))
             rows = cur.fetchall()
@@ -297,19 +293,15 @@ def kumite_bracket(event_id, category_kumite_id):
                 """, (category_kumite_id,))
                 fights_count = cur.fetchone()[0]
             
-            # Pobierz pojedynki
+            # Pobierz pojedynki z widoku
             cur.execute(f"""
-                SELECT df.fight_no, df.red_code, df.blue_code,
-                       u_red.first_name as red_first, u_red.last_name as red_last,
-                       u_red.country_code as red_country, u_red.club_name as red_club,
-                       u_blue.first_name as blue_first, u_blue.last_name as blue_last,
-                       u_blue.country_code as blue_country, u_blue.club_name as blue_club
-                FROM {SCHEMA}.draw_fight df
-                LEFT JOIN {SCHEMA}.users u_red ON df.red_code = u_red.athlete_code
-                LEFT JOIN {SCHEMA}.users u_blue ON df.blue_code = u_blue.athlete_code
-                WHERE df.category_kumite_id = %s 
-                  AND df.round_no = 1
-                ORDER BY df.fight_no
+                SELECT fight_no, red_code, blue_code,
+                       red_first, red_last, red_country, red_club,
+                       blue_first, blue_last, blue_country, blue_club
+                FROM {SCHEMA}.v_kumite_fights
+                WHERE category_kumite_id = %s 
+                  AND round_no = 1
+                ORDER BY fight_no
             """, (category_kumite_id,))
             fights = cur.fetchall()
             
