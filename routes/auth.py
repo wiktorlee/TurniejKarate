@@ -125,7 +125,7 @@ def login():
         flash("Podaj hasło.", "error")
         return render_template("login.html"), 400
 
-    sql = f"SELECT id FROM {SCHEMA}.users WHERE login=%s AND password=%s"
+    sql = f"SELECT id, is_admin FROM {SCHEMA}.users WHERE login=%s AND password=%s"
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(sql, (login_val, password_val))
         row = cur.fetchone()
@@ -136,6 +136,7 @@ def login():
     session.clear()
     session["user_id"] = row[0]
     session["login"] = login_val
+    session["is_admin"] = row[1] if row[1] else False
     flash("Zalogowano.", "success")
     return redirect(url_for("profile.profile"))
 

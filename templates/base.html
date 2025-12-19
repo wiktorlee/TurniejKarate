@@ -24,9 +24,14 @@
 <nav>
   {% if session.get('user_id') %}
     <a href="{{ url_for('profile.profile') }}">Profil</a>
+    {% if system_status == 'ACTIVE' %}
     <a href="{{ url_for('categories.categories') }}">Zapisy</a>
+    {% endif %}
     <a href="{{ url_for('registration.my_registration') }}">Moje zgłoszenie</a>
     <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>
+    {% if session.get('is_admin') %}
+    <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+    {% endif %}
     <a href="{{ url_for('auth.logout') }}">Wyloguj</a>
   {% else %}
     <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>

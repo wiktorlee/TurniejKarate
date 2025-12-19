@@ -1,7 +1,6 @@
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash
 from database import get_conn
 from config import SCHEMA
-import random
 
 registration_bp = Blueprint('registration', __name__)
 
@@ -274,24 +273,54 @@ def kumite_bracket(event_id, category_kumite_id):
             
             event_name, start_date, end_date, category_name = event_cat
             
+            # Pobierz listę wszystkich zarejestrowanych zawodników z widoku
+            cur.execute(f"""
+                SELECT athlete_code
+                FROM {SCHEMA}.v_kumite_competitors
+                WHERE event_id = %s AND category_kumite_id = %s
+            """, (event_id, category_kumite_id))
+            registered_athletes = set(row[0] for row in cur.fetchall())
+            
             # Sprawdź czy istnieją pojedynki dla tej kategorii
-            # Używamy category_kumite_id bezpośrednio (zakładamy że kolumna category_kumite_id istnieje w draw_fight)
-            # Jeśli nie, użyjemy category_id i sprawdzimy czy wskazuje na categories_kumite
             cur.execute(f"""
                 SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
                 WHERE category_kumite_id = %s AND round_no = 1
             """, (category_kumite_id,))
             fights_count = cur.fetchone()[0]
             
-            # Jeśli brak pojedynków, wygeneruj je
-            if fights_count == 0:
-                _generate_kumite_bracket(conn, cur, event_id, category_kumite_id)
-                # Po wygenerowaniu, pobierz ponownie liczbę
+            # Pobierz listę zawodników w drzewku (jeśli istnieje)
+            athletes_in_bracket = set()
+            if fights_count > 0:
                 cur.execute(f"""
-                    SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
+                    SELECT DISTINCT red_code, blue_code
+                    FROM {SCHEMA}.draw_fight
                     WHERE category_kumite_id = %s AND round_no = 1
                 """, (category_kumite_id,))
-                fights_count = cur.fetchone()[0]
+                for row in cur.fetchall():
+                    if row[0]:  # red_code
+                        athletes_in_bracket.add(row[0])
+                    if row[1]:  # blue_code
+                        athletes_in_bracket.add(row[1])
+            
+            # Jeśli brak pojedynków LUB zawodnicy w drzewku nie pasują do zarejestrowanych, wygeneruj/odśwież drzewka
+            if fights_count == 0 or registered_athletes != athletes_in_bracket:
+                # Usuń stare drzewka jeśli istnieją
+                if fights_count > 0:
+                    cur.execute(f"""
+                        DELETE FROM {SCHEMA}.draw_fight 
+                        WHERE category_kumite_id = %s AND round_no = 1
+                    """, (category_kumite_id,))
+                    conn.commit()
+                
+                # Wygeneruj nowe drzewka
+                if len(registered_athletes) >= 2:
+                    _generate_kumite_bracket(conn, cur, event_id, category_kumite_id)
+                    # Po wygenerowaniu, pobierz ponownie liczbę
+                    cur.execute(f"""
+                        SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
+                        WHERE category_kumite_id = %s AND round_no = 1
+                    """, (category_kumite_id,))
+                    fights_count = cur.fetchone()[0]
             
             # Pobierz pojedynki z widoku
             cur.execute(f"""
@@ -343,20 +372,19 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     Funkcja pomocnicza do generowania drzewka walk.
     Losowo przydziela zawodników do pojedynków.
     """
-    # Pobierz zawodników zapisanych do kategorii z widoku
+    # Pobierz zawodników zapisanych do kategorii z widoku - LOSOWO
     cur.execute(f"""
         SELECT athlete_code
         FROM {SCHEMA}.v_kumite_competitors
         WHERE event_id = %s AND category_kumite_id = %s
-        ORDER BY athlete_code
+        ORDER BY RANDOM()
     """, (event_id, category_kumite_id))
     athletes = [row[0] for row in cur.fetchall()]
     
     if len(athletes) < 2:
         raise ValueError("Za mało zawodników do utworzenia drzewka (min. 2)")
     
-    # Losowe przydzielenie
-    random.shuffle(athletes)
+    # Losowanie odbywa się już w SQL (ORDER BY RANDOM()), nie trzeba shuffle
     
     # Jeśli nieparzysta liczba, ostatni zawodnik dostaje BYE
     if len(athletes) % 2 != 0:
@@ -383,4 +411,3 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     except Exception as e:
         conn.rollback()
         raise
-

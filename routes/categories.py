@@ -17,6 +17,13 @@ def categories():
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
+            # Sprawdź status systemu - blokada zapisów jeśli system nie jest aktywny
+            cur.execute(f"SELECT status FROM {SCHEMA}.system_status ORDER BY id DESC LIMIT 1")
+            status_row = cur.fetchone()
+            if status_row and status_row[0] != 'ACTIVE':
+                flash("System jest w stanie zakończonym. Zapisy są zablokowane. Możesz przeglądać rankingi.", "error")
+                return redirect(url_for("rankings.show_rankings"))
+            
             cur.execute(f"SELECT athlete_code, sex, birth_date, weight FROM {SCHEMA}.users WHERE id = %s", (uid,))
             row = cur.fetchone()
             if not row or not row[0]:
