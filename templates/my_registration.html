@@ -25,6 +25,15 @@
         {% if reg.kata_name %}
           <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
             <p style="margin: 0;"><b>Kata:</b> {{ reg.kata_name }}</p>
+            {% if reg.kata_result %}
+              <p style="margin: 4px 0; color: #28a745; font-weight: bold;">
+                Wynik: Miejsce {{ reg.kata_result.place }}, Punkty: {{ reg.kata_result.points }}
+              </p>
+            {% else %}
+              <p style="margin: 4px 0; color: #666; font-style: italic;">
+                Brak wyniku
+              </p>
+            {% endif %}
             <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="{{ url_for('registration.kata_competitors', event_id=reg.event_id, category_kata_id=reg.category_kata_id) }}" 
                  style="background: #0a58ca; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; display: inline-block;">
@@ -44,6 +53,15 @@
         {% if reg.kumite_name %}
           <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
             <p style="margin: 0;"><b>Kumite:</b> {{ reg.kumite_name }}</p>
+            {% if reg.kumite_result %}
+              <p style="margin: 4px 0; color: #28a745; font-weight: bold;">
+                Wynik: Miejsce {{ reg.kumite_result.place }}
+              </p>
+            {% else %}
+              <p style="margin: 4px 0; color: #666; font-style: italic;">
+                Brak wyniku
+              </p>
+            {% endif %}
             <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="{{ url_for('registration.kumite_bracket', event_id=reg.event_id, category_kumite_id=reg.category_kumite_id) }}" 
                  style="background: #0a58ca; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; display: inline-block;">

@@ -35,16 +35,64 @@ def my_registration():
 
             registrations = []
             for row in rows:
+                reg_id, event_id, category_kata_id, category_kumite_id = row[0], row[1], row[2], row[3]
+                
+                # Pobierz wyniki dla Kata (jeśli istnieje)
+                kata_result = None
+                if category_kata_id:
+                    # Pobierz nazwę kategorii Kata
+                    cur.execute(f"""
+                        SELECT name FROM {SCHEMA}.categories_kata WHERE id = %s
+                    """, (category_kata_id,))
+                    kata_cat_row = cur.fetchone()
+                    if kata_cat_row:
+                        kata_category_name = kata_cat_row[0]
+                        cur.execute(f"""
+                            SELECT place, points
+                            FROM {SCHEMA}.results
+                            WHERE athlete_code = %s 
+                              AND event_id = %s 
+                              AND category_name = %s
+                            LIMIT 1
+                        """, (athlete_code, event_id, kata_category_name))
+                        kata_row = cur.fetchone()
+                        if kata_row:
+                            kata_result = {"place": kata_row[0], "points": kata_row[1]}
+                
+                # Pobierz wyniki dla Kumite (jeśli istnieje)
+                kumite_result = None
+                if category_kumite_id:
+                    # Pobierz nazwę kategorii Kumite
+                    cur.execute(f"""
+                        SELECT name FROM {SCHEMA}.categories_kumite WHERE id = %s
+                    """, (category_kumite_id,))
+                    kumite_cat_row = cur.fetchone()
+                    if kumite_cat_row:
+                        kumite_category_name = kumite_cat_row[0]
+                        cur.execute(f"""
+                            SELECT place, points
+                            FROM {SCHEMA}.results
+                            WHERE athlete_code = %s 
+                              AND event_id = %s 
+                              AND category_name = %s
+                            LIMIT 1
+                        """, (athlete_code, event_id, kumite_category_name))
+                        kumite_row = cur.fetchone()
+                        if kumite_row:
+                            kumite_result = {"place": kumite_row[0], "points": kumite_row[1]}
+                
                 registrations.append({
-                    "reg_id": row[0],
-                    "event_id": row[1],
-                    "category_kata_id": row[2],
-                    "category_kumite_id": row[3],
+                    "reg_id": reg_id,
+                    "event_id": event_id,
+                    "category_kata_id": category_kata_id,
+                    "category_kumite_id": category_kumite_id,
                     "event_name": row[4],
                     "start_date": row[5],
                     "end_date": row[6],
                     "kata_name": row[7],
-                    "kumite_name": row[8]
+                    "kumite_name": row[8],
+                    "kata_result": kata_result,
+                    "kumite_result": kumite_result
                 })
 
             return render_template("my_registration.html", registrations=registrations)
@@ -204,13 +252,16 @@ def kata_competitors(event_id, category_kata_id):
             
             event_name, start_date, end_date, category_name = event_cat
             
-            # Pobierz listę zawodników z widoku
+            # Pobierz listę zawodników z widoku (z wynikami)
             cur.execute(f"""
                 SELECT athlete_code, first_name, last_name, 
-                       country_code, club_name, nationality
+                       country_code, club_name, nationality,
+                       place, points
                 FROM {SCHEMA}.v_kata_competitors
                 WHERE event_id = %s AND category_kata_id = %s
-                ORDER BY last_name, first_name, athlete_code
+                ORDER BY 
+                    CASE WHEN place IS NULL THEN 999 ELSE place END,
+                    last_name, first_name, athlete_code
             """, (event_id, category_kata_id))
             competitors = cur.fetchall()
             
@@ -225,6 +276,8 @@ def kata_competitors(event_id, category_kata_id):
                     "country_code": row[3],
                     "club_name": row[4] or "",
                     "nationality": row[5] or "",
+                    "place": row[6],  # może być None
+                    "points": row[7],  # może być None
                     "is_current_user": is_current_user
                 })
             
@@ -322,34 +375,42 @@ def kumite_bracket(event_id, category_kumite_id):
                     """, (category_kumite_id,))
                     fights_count = cur.fetchone()[0]
             
-            # Pobierz pojedynki z widoku
+            # Pobierz wszystkie rundy z widoku (z wynikami)
             cur.execute(f"""
-                SELECT fight_no, red_code, blue_code,
+                SELECT round_no, fight_no, red_code, blue_code,
                        red_first, red_last, red_country, red_club,
-                       blue_first, blue_last, blue_country, blue_club
+                       blue_first, blue_last, blue_country, blue_club,
+                       winner_code, red_score, blue_score, is_finished
                 FROM {SCHEMA}.v_kumite_fights
                 WHERE category_kumite_id = %s 
-                  AND round_no = 1
-                ORDER BY fight_no
+                ORDER BY round_no, fight_no
             """, (category_kumite_id,))
             fights = cur.fetchall()
             
-            # Formatuj dane
-            fights_list = []
+            # Grupuj walki według rundy
+            fights_by_round = {}
             for row in fights:
-                fight_no, red_code, blue_code = row[0], row[1], row[2]
+                round_no = row[0]
+                if round_no not in fights_by_round:
+                    fights_by_round[round_no] = []
+                
+                fight_no, red_code, blue_code = row[1], row[2], row[3]
                 is_user_in_fight = (red_code == user_athlete_code or blue_code == user_athlete_code)
                 
-                fights_list.append({
+                fights_by_round[round_no].append({
                     "fight_no": fight_no,
                     "red_code": red_code,
                     "blue_code": blue_code,
-                    "red_name": f"{row[3] or ''} {row[4] or ''}".strip() if row[3] or row[4] else "BYE",
-                    "red_country": row[5] or "",
-                    "red_club": row[6] or "",
-                    "blue_name": f"{row[7] or ''} {row[8] or ''}".strip() if row[7] or row[8] else "BYE",
-                    "blue_country": row[9] or "",
-                    "blue_club": row[10] or "",
+                    "red_name": f"{row[4] or ''} {row[5] or ''}".strip() if row[4] or row[5] else "BYE",
+                    "red_country": row[6] or "",
+                    "red_club": row[7] or "",
+                    "blue_name": f"{row[8] or ''} {row[9] or ''}".strip() if row[8] or row[9] else "BYE",
+                    "blue_country": row[10] or "",
+                    "blue_club": row[11] or "",
+                    "winner_code": row[12],  # może być None
+                    "red_score": row[13],  # może być None
+                    "blue_score": row[14],  # może być None
+                    "is_finished": row[15] if row[15] is not None else False,
                     "is_bye": (blue_code is None),
                     "is_current_user": is_user_in_fight
                 })
@@ -359,7 +420,7 @@ def kumite_bracket(event_id, category_kumite_id):
                                  category_name=category_name,
                                  start_date=start_date,
                                  end_date=end_date,
-                                 fights=fights_list,
+                                 fights_by_round=fights_by_round,
                                  event_id=event_id,
                                  category_kumite_id=category_kumite_id)
     except Exception as e:

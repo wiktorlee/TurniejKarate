@@ -21,21 +21,37 @@
     <table style="width: 100%; margin-top: 16px; border-collapse: collapse;">
       <thead>
         <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+          <th style="padding: 8px; text-align: left;">Miejsce</th>
           <th style="padding: 8px; text-align: left;">Kod</th>
           <th style="padding: 8px; text-align: left;">Imię i nazwisko</th>
           <th style="padding: 8px; text-align: left;">Kraj</th>
           <th style="padding: 8px; text-align: left;">Klub</th>
           <th style="padding: 8px; text-align: left;">Narodowość</th>
+          <th style="padding: 8px; text-align: left;">Punkty</th>
         </tr>
       </thead>
       <tbody>
         {% for comp in competitors %}
           <tr style="border-bottom: 1px solid #eee; {% if comp.is_current_user %}background: #e6f4ea;{% endif %}">
+            <td style="padding: 8px; text-align: center;">
+              {% if comp.place %}
+                <b>{{ comp.place }}</b>
+              {% else %}
+                <span style="color: #666;">-</span>
+              {% endif %}
+            </td>
             <td style="padding: 8px;"><b>{{ comp.athlete_code }}</b>{% if comp.is_current_user %} <small>(Ty)</small>{% endif %}</td>
             <td style="padding: 8px;">{{ comp.first_name }} {{ comp.last_name }}</td>
             <td style="padding: 8px;">{{ comp.country_code }}</td>
             <td style="padding: 8px;">{{ comp.club_name or '-' }}</td>
             <td style="padding: 8px;">{{ comp.nationality or '-' }}</td>
+            <td style="padding: 8px; text-align: center;">
+              {% if comp.points is not none %}
+                <b>{{ comp.points }}</b>
+              {% else %}
+                <span style="color: #666;">Brak wyniku</span>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
