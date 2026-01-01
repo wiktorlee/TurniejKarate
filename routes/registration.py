@@ -337,8 +337,8 @@ def kumite_bracket(event_id, category_kumite_id):
             # Sprawdź czy istnieją pojedynki dla tej kategorii
             cur.execute(f"""
                 SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
-                WHERE category_kumite_id = %s AND round_no = 1
-            """, (category_kumite_id,))
+                WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
+            """, (category_kumite_id, event_id))
             fights_count = cur.fetchone()[0]
             
             # Pobierz listę zawodników w drzewku (jeśli istnieje)
@@ -347,8 +347,8 @@ def kumite_bracket(event_id, category_kumite_id):
                 cur.execute(f"""
                     SELECT DISTINCT red_code, blue_code
                     FROM {SCHEMA}.draw_fight
-                    WHERE category_kumite_id = %s AND round_no = 1
-                """, (category_kumite_id,))
+                    WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
+                """, (category_kumite_id, event_id))
                 for row in cur.fetchall():
                     if row[0]:  # red_code
                         athletes_in_bracket.add(row[0])
@@ -361,8 +361,8 @@ def kumite_bracket(event_id, category_kumite_id):
                 if fights_count > 0:
                     cur.execute(f"""
                         DELETE FROM {SCHEMA}.draw_fight 
-                        WHERE category_kumite_id = %s AND round_no = 1
-                    """, (category_kumite_id,))
+                        WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
+                    """, (category_kumite_id, event_id))
                     conn.commit()
                 
                 # Wygeneruj nowe drzewka
@@ -371,33 +371,38 @@ def kumite_bracket(event_id, category_kumite_id):
                     # Po wygenerowaniu, pobierz ponownie liczbę
                     cur.execute(f"""
                         SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
-                        WHERE category_kumite_id = %s AND round_no = 1
-                    """, (category_kumite_id,))
+                        WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
+                    """, (category_kumite_id, event_id))
                     fights_count = cur.fetchone()[0]
             
-            # Pobierz wszystkie rundy z widoku (z wynikami)
+            # Pobierz wszystkie rundy bezpośrednio z draw_fight (z wynikami)
             cur.execute(f"""
-                SELECT round_no, fight_no, red_code, blue_code,
-                       red_first, red_last, red_country, red_club,
-                       blue_first, blue_last, blue_country, blue_club,
-                       winner_code, red_score, blue_score, is_finished
-                FROM {SCHEMA}.v_kumite_fights
-                WHERE category_kumite_id = %s 
-                ORDER BY round_no, fight_no
-            """, (category_kumite_id,))
+                SELECT df.round_no, df.fight_no, df.red_code, df.blue_code,
+                       COALESCE(red_u.first_name, '') as red_first, 
+                       COALESCE(red_u.last_name, '') as red_last,
+                       red_u.country_code as red_country,
+                       red_u.club_name as red_club,
+                       COALESCE(blue_u.first_name, '') as blue_first,
+                       COALESCE(blue_u.last_name, '') as blue_last,
+                       blue_u.country_code as blue_country,
+                       blue_u.club_name as blue_club,
+                       df.winner_code, df.red_score, df.blue_score, 
+                       COALESCE(df.is_finished, FALSE) as is_finished
+                FROM {SCHEMA}.draw_fight df
+                LEFT JOIN {SCHEMA}.users red_u ON df.red_code = red_u.athlete_code
+                LEFT JOIN {SCHEMA}.users blue_u ON df.blue_code = blue_u.athlete_code
+                WHERE df.category_kumite_id = %s AND df.event_id = %s
+                ORDER BY df.round_no, df.fight_no
+            """, (category_kumite_id, event_id))
             fights = cur.fetchall()
             
-            # Grupuj walki według rundy
-            fights_by_round = {}
+            # Utwórz płaską listę walk (szablon oczekuje fights_list)
+            fights_list = []
             for row in fights:
-                round_no = row[0]
-                if round_no not in fights_by_round:
-                    fights_by_round[round_no] = []
-                
                 fight_no, red_code, blue_code = row[1], row[2], row[3]
                 is_user_in_fight = (red_code == user_athlete_code or blue_code == user_athlete_code)
                 
-                fights_by_round[round_no].append({
+                fights_list.append({
                     "fight_no": fight_no,
                     "red_code": red_code,
                     "blue_code": blue_code,
@@ -420,7 +425,7 @@ def kumite_bracket(event_id, category_kumite_id):
                                  category_name=category_name,
                                  start_date=start_date,
                                  end_date=end_date,
-                                 fights_by_round=fights_by_round,
+                                 fights_list=fights_list,
                                  event_id=event_id,
                                  category_kumite_id=category_kumite_id)
     except Exception as e:
@@ -463,9 +468,9 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
             
             cur.execute(f"""
                 INSERT INTO {SCHEMA}.draw_fight 
-                (category_id, category_kumite_id, round_no, fight_no, red_code, blue_code)
-                VALUES (%s, %s, 1, %s, %s, %s)
-            """, (category_kumite_id, category_kumite_id, fight_no, red_code, blue_code))
+                (category_id, category_kumite_id, event_id, round_no, fight_no, red_code, blue_code)
+                VALUES (%s, %s, %s, 1, %s, %s, %s)
+            """, (category_kumite_id, category_kumite_id, event_id, fight_no, red_code, blue_code))
             fight_no += 1
         
         conn.commit()
