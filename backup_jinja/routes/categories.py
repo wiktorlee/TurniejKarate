@@ -12,11 +12,9 @@ categories_bp = Blueprint('categories', __name__)
 def categories():
     uid = session.get("user_id")
     if not uid:
+        flash("Musisz być zalogowany, aby zobaczyć kategorie.", "error")
         return redirect(url_for("auth.login"))
-    # Data loading and POST handling moved to API/JS - this route only serves template
-    return render_template("categories.html")
 
-def _categories_old():  # Old logic preserved but not used
     try:
         with get_conn() as conn, conn.cursor() as cur:
             # Sprawdź status systemu - blokada zapisów jeśli system nie jest aktywny

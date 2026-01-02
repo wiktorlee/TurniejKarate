@@ -2,103 +2,13 @@
 {% block content %}
 <h1>Panel Administratorski</h1>
 
-<div class="card" style="margin-bottom: 16px;">
-    <h2>Status Systemu</h2>
-    <p><strong>Status:</strong> 
-        {% if system_status.status == 'ACTIVE' %}
-            <span style="color: green;">AKTYWNY</span>
-        {% elif system_status.status == 'SIMULATED' %}
-            <span style="color: orange;">SYMULOWANY</span>
-        {% else %}
-            <span style="color: red;">ZAMKNIĘTY</span>
-        {% endif %}
-    </p>
-    {% if system_status.simulation_date %}
-    <p><strong>Data symulacji:</strong> {{ system_status.simulation_date }}</p>
-    {% endif %}
-    {% if system_status.reset_date %}
-    <p><strong>Data ostatniego resetu:</strong> {{ system_status.reset_date }}</p>
-    {% endif %}
-    {% if system_status.updated_at %}
-    <p><strong>Ostatnia aktualizacja:</strong> {{ system_status.updated_at }}</p>
-    {% endif %}
+<div id="admin-dashboard-container">
+  <div class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Ładowanie...</span>
+    </div>
+  </div>
 </div>
 
-<div class="card" style="margin-bottom: 16px;">
-    <h2>Statystyki</h2>
-    <p>Kukiełki w systemie: <strong>{{ dummy_count }}</strong></p>
-    <p>Aktywne eventy: <strong>{{ active_events }}</strong></p>
-    <p>Wyniki w bazie: <strong>{{ results_count }}</strong></p>
-    <p>Rejestracje w bazie: <strong>{{ registrations_count }}</strong></p>
-</div>
-
-<div class="card">
-    <h2>Akcje Administracyjne</h2>
-    
-    <div style="margin: 24px 0; padding: 16px; background-color: #f8f9fa; border-radius: 8px;">
-        <h3>Masowa rejestracja kukiełek</h3>
-        <p style="margin: 8px 0;">Rejestruje wszystkie kukiełki do aktywnych eventów zgodnie z ich przypisanymi kategoriami (auto_category_kata_id, auto_category_kumite_id).</p>
-        <p style="margin: 8px 0; color: #666; font-size: 0.9em;">Procedura SQL sprawdza czy rejestracje już istnieją, więc można wywołać bezpiecznie wielokrotnie.</p>
-        <form method="post" action="{{ url_for('admin.restore_dummy_athletes') }}" 
-              onsubmit="return confirm('Czy na pewno chcesz zarejestrować wszystkie kukiełki do aktywnych eventów?');" 
-              style="margin-top: 12px;">
-            <button type="submit" style="background-color: #0d6efd; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-                Zarejestruj kukiełki
-            </button>
-        </form>
-    </div>
-    
-    <div style="margin: 24px 0; padding: 16px; background-color: #fff3cd; border-radius: 8px; border: 1px solid #ffc107;">
-        <h3>Reset systemu</h3>
-        <p style="margin: 8px 0;"><strong>UWAGA:</strong> To usunie wszystkie wyniki i drzewka walk. System wróci do stanu początkowego.</p>
-        <form method="post" action="{{ url_for('admin.reset_system') }}" 
-              onsubmit="return confirm('UWAGA: To usunie wszystkie wyniki i drzewka walk. Czy na pewno chcesz kontynuować?');" 
-              style="margin-top: 12px;">
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="restore_dummies" value="true">
-                <span>Przywróć rejestracje kukiełek po resecie (wywoła procedurę SQL)</span>
-            </label>
-            <button type="submit" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-                Zresetuj system
-            </button>
-        </form>
-    </div>
-    
-    <div style="margin: 24px 0; padding: 16px; background-color: #e7f3ff; border-radius: 8px; border: 1px solid #0d6efd;">
-        <h3>Symulacja sezonu</h3>
-        <p style="margin: 8px 0;">Losuje wyniki dla wszystkich aktywnych eventów i aktualizuje rankingi.</p>
-        <p style="margin: 8px 0; color: #666; font-size: 0.9em;">Status systemu zmieni się na SIMULATED po zakończeniu symulacji.</p>
-        <form method="post" action="{{ url_for('admin.simulate_season') }}" 
-              onsubmit="return confirm('Czy na pewno chcesz przeprowadzić symulację sezonu?');" 
-              style="margin-top: 12px;">
-            <button type="submit" 
-                    {% if system_status.status == 'SIMULATED' %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}
-                    style="background-color: #198754; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-                {% if system_status.status == 'SIMULATED' %}
-                Symulacja już przeprowadzona
-                {% else %}
-                Uruchom symulację
-                {% endif %}
-            </button>
-        </form>
-    </div>
-</div>
-
-<div style="margin-top: 24px;">
-    <a href="{{ url_for('main.index') }}" style="text-decoration: none; color: #0d6efd;">← Powrót do strony głównej</a>
-</div>
+<script src="/static/js/admin.js"></script>
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-

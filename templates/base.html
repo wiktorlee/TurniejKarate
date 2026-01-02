@@ -4,56 +4,243 @@
   <meta charset="utf-8">
   <title>Turniej Karate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
-    body{font-family:system-ui,Arial,sans-serif;max-width:840px;margin:24px auto;padding:0 16px}
-    header{display:flex;gap:12px;align-items:center;margin-bottom:16px}
-    nav a{margin-right:12px;text-decoration:none;color:#0a58ca}
-    .flashes{list-style:none;padding:0;margin:0 0 16px 0}
-    .flashes li{padding:10px 12px;border-radius:8px;margin-bottom:8px}
-    .success{background:#e6f4ea}
-    .error{background:#fde2e1}
-    form label{display:block;margin:8px 0 4px}
-    input,button{padding:8px 10px;border-radius:8px;border:1px solid #ccc}
-    button{cursor:pointer}
-    .card{border:1px solid #eee;border-radius:12px;padding:16px}
+    :root {
+      --karate-red: #dc3545;
+      --karate-red-dark: #c82333;
+      --karate-white: #ffffff;
+      --karate-black: #212529;
+      --karate-gray: #f8f9fa;
+    }
+    
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      max-width: 840px;
+      margin: 24px auto;
+      padding: 0 16px;
+      background-color: var(--karate-white);
+      color: var(--karate-black);
+    }
+    
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--karate-red) 0%, var(--karate-red-dark) 100%);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1); /* Białe logo na czerwonym tle */
+    }
+    
+    .logo-dark {
+      filter: none; /* Dla czarnego logo (np. kaligrafia) - usuń powyższy filter */
+    }
+    
+    header .title-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    header strong {
+      color: var(--karate-white);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    
+    nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      text-decoration: none;
+      color: var(--karate-white);
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    nav a:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      color: var(--karate-white);
+    }
+    
+    nav a i {
+      font-size: 1.1rem;
+    }
+    
+    .card {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      background: var(--karate-white);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .btn-primary {
+      background-color: var(--karate-red);
+      border-color: var(--karate-red);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--karate-red-dark);
+      border-color: var(--karate-red-dark);
+    }
+    
+    h1 {
+      color: var(--karate-red);
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    .alert {
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 <header>
-  <strong>Turniej Karate</strong>
-<nav>
-  {% if session.get('user_id') %}
-    <a href="{{ url_for('profile.profile') }}">Profil</a>
-    {% if system_status == 'ACTIVE' %}
-    <a href="{{ url_for('categories.categories') }}">Zapisy</a>
-    {% endif %}
-    <a href="{{ url_for('registration.my_registration') }}">Moje zgłoszenie</a>
-    <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>
-    {% if session.get('is_admin') %}
-    <a href="{{ url_for('admin.dashboard') }}">Admin</a>
-    {% endif %}
-    <a href="{{ url_for('auth.logout') }}">Wyloguj</a>
-  {% else %}
-    <a href="{{ url_for('rankings.show_rankings') }}">Rankingi</a>
-    <a href="{{ url_for('auth.register') }}">Rejestracja</a>
-    <a href="{{ url_for('auth.login') }}">Logowanie</a>
-  {% endif %}
-</nav>
-
+  <div class="title-section">
+    <img src="/static/images/logo.png" alt="Logo" class="logo" id="header-logo" style="display: none;">
+    <strong>Turniej Karate</strong>
+  </div>
+  <nav id="main-nav">
+    <!-- Navigation will be populated by JavaScript -->
+  </nav>
 </header>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-      {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+<div id="flash-messages"></div>
 
 <main>
   {% block content %}{% endblock %}
 </main>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- API and Utils -->
+<script src="/static/js/api.js"></script>
+<script src="/static/js/utils.js"></script>
+<!-- Navigation script (runs on all pages) -->
+<script>
+  // Show logo if it exists
+  document.addEventListener('DOMContentLoaded', () => {
+    const logo = document.getElementById('header-logo');
+    if (logo) {
+      logo.onerror = function() {
+        this.style.display = 'none'; // Hide if image doesn't exist
+      };
+      logo.onload = function() {
+        this.style.display = 'block'; // Show if image loads successfully
+      };
+      // Trigger load check
+      logo.src = logo.src;
+    }
+  });
+  
+  // Load navigation based on auth status
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const authData = await api.get('/api/auth/check');
+      const nav = document.getElementById('main-nav');
+      
+      if (authData.authenticated) {
+        // Get system status for navigation
+        // For now, show all links - we'll add system_status check later if needed
+        nav.innerHTML = `
+          <a href="/profile">
+            <i class="bi bi-person-circle"></i>
+            <span>Profil</span>
+          </a>
+          <a href="/categories">
+            <i class="bi bi-clipboard-check"></i>
+            <span>Zapisy</span>
+          </a>
+          <a href="/my-registration">
+            <i class="bi bi-file-text"></i>
+            <span>Moje zgłoszenie</span>
+          </a>
+          <a href="/rankings">
+            <i class="bi bi-trophy-fill"></i>
+            <span>Rankingi</span>
+          </a>
+          ${authData.is_admin ? `
+          <a href="/admin">
+            <i class="bi bi-shield-check"></i>
+            <span>Admin</span>
+          </a>
+          ` : ''}
+          <a href="#" id="logout-link">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Wyloguj</span>
+          </a>
+        `;
+        
+        // Logout handler
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            await api.post('/api/logout');
+            window.location.href = '/login';
+          } catch (error) {
+            utils.showFlash('Błąd podczas wylogowania', 'error');
+          }
+        });
+      } else {
+        nav.innerHTML = `
+          <a href="/rankings">
+            <i class="bi bi-trophy-fill"></i>
+            <span>Rankingi</span>
+          </a>
+          <a href="/register">
+            <i class="bi bi-person-plus"></i>
+            <span>Rejestracja</span>
+          </a>
+          <a href="/login">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span>Logowanie</span>
+          </a>
+        `;
+      }
+    } catch (error) {
+      // If auth check fails, show public navigation
+      const nav = document.getElementById('main-nav');
+      nav.innerHTML = `
+        <a href="/rankings">
+          <i class="bi bi-trophy-fill"></i>
+          <span>Rankingi</span>
+        </a>
+        <a href="/register">
+          <i class="bi bi-person-plus"></i>
+          <span>Rejestracja</span>
+        </a>
+        <a href="/login">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Logowanie</span>
+        </a>
+      `;
+    }
+  });
+</script>
 </body>
 </html>

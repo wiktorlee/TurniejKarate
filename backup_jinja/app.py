@@ -7,12 +7,7 @@ from routes.categories import categories_bp
 from routes.registration import registration_bp
 from routes.rankings import rankings_bp
 from routes.admin import admin_bp
-from routes.api.auth import api_auth_bp
-from routes.api.profile import api_profile_bp
-from routes.api.categories import api_categories_bp
-from routes.api.registration import api_registration_bp
-from routes.api.rankings import api_rankings_bp
-from routes.api.admin import api_admin_bp
+from utils import get_system_status
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -26,13 +21,10 @@ app.register_blueprint(registration_bp)
 app.register_blueprint(rankings_bp)
 app.register_blueprint(admin_bp)
 
-# API blueprints
-app.register_blueprint(api_auth_bp)
-app.register_blueprint(api_profile_bp)
-app.register_blueprint(api_categories_bp)
-app.register_blueprint(api_registration_bp)
-app.register_blueprint(api_rankings_bp)
-app.register_blueprint(api_admin_bp)
+# Context processor - dostępność system_status we wszystkich szablonach
+@app.context_processor
+def inject_system_status():
+    return dict(system_status=get_system_status())
 
 
 

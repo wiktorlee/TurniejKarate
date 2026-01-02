@@ -1,115 +1,15 @@
 {% extends "base.html" %}
-
 {% block content %}
 <h1>Rankingi Sezonowe</h1>
 <p>Punkty naliczane zgodnie z zasadami: Złoto 50pkt, Srebro 40pkt, Brąz 20pkt.</p>
 
-<div style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; margin-bottom: 40px;">
-
-    <div class="card" style="flex: 1; min-width: 300px;">
-        <h2 style="margin-top: 0; color: #0a58ca;">🏆 Ranking Klubowy</h2>
-        {% if club_ranking %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-                <thead>
-                    <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
-                        <th style="padding: 10px; text-align: center;">#</th>
-                        <th style="padding: 10px; text-align: left;">Klub</th>
-                        <th style="padding: 10px; text-align: center;">Punkty</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in club_ranking %}
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px; text-align: center; font-weight: bold;">
-                            {% if item.place <= 3 %}🏅{% else %}{{ item.place }}{% endif %}
-                        </td>
-                        <td style="padding: 10px;">{{ item.name }}</td>
-                        <td style="padding: 10px; text-align: center; font-weight: bold;">{{ item.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p style="color: #666;">Brak danych.</p>
-        {% endif %}
+<div id="rankings-container">
+  <div class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Ładowanie...</span>
     </div>
-
-    <div class="card" style="flex: 1; min-width: 300px;">
-        <h2 style="margin-top: 0; color: #dc3545;">🌍 Ranking Narodowościowy</h2>
-        {% if nation_ranking %}
-            <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-                <thead>
-                    <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
-                        <th style="padding: 10px; text-align: center;">#</th>
-                        <th style="padding: 10px; text-align: left;">Kraj</th>
-                        <th style="padding: 10px; text-align: center;">Punkty</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in nation_ranking %}
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px; text-align: center; font-weight: bold;">
-                           {% if item.place <= 3 %}🏅{% else %}{{ item.place }}{% endif %}
-                        </td>
-                        <td style="padding: 10px;">{{ item.name }}</td>
-                        <td style="padding: 10px; text-align: center; font-weight: bold;">{{ item.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p style="color: #666;">Brak danych.</p>
-        {% endif %}
-    </div>
+  </div>
 </div>
 
-<hr style="border: 0; border-top: 1px solid #ddd; margin: 30px 0;">
-
-<h2 style="margin-bottom: 20px;">🥋 Rankingi Indywidualne (Kategorie)</h2>
-
-{% if individual_ranking %}
-    {% for category_name, athletes in individual_ranking.items() %}
-        <div class="card" style="margin-bottom: 24px;">
-            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                {{ category_name }}
-            </h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="color: #666; font-size: 0.9em;">
-                        <th style="padding: 8px; text-align: center; width: 50px;">#</th>
-                        <th style="padding: 8px; text-align: left;">Zawodnik</th>
-                        <th style="padding: 8px; text-align: left;">Klub / Kraj</th>
-                        <th style="padding: 8px; text-align: center;">Punkty</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in athletes %}
-                    <tr style="border-bottom: 1px solid #f9f9f9;">
-                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #0a58ca;">
-                            {{ p.place }}
-                        </td>
-                        <td style="padding: 10px;">
-                            <b>{{ p.first_name }} {{ p.last_name }}</b>
-                        </td>
-                        <td style="padding: 10px; color: #555;">
-                            {{ p.club }} <small>({{ p.country }})</small>
-                        </td>
-                        <td style="padding: 10px; text-align: center; font-weight: bold;">
-                            {{ p.points }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% endfor %}
-{% else %}
-    <p>Brak wyników indywidualnych.</p>
-{% endif %}
-
+<script src="/static/js/rankings.js"></script>
 {% endblock %}
-
-
-
-
-

@@ -3,84 +3,26 @@
 <h1>Lista walk - Kumite</h1>
 
 <div class="card">
-  <h2 style="margin-top: 0;">{{ event_name }}</h2>
-  <p><b>Kategoria:</b> {{ category_name }}</p>
-  {% if start_date or end_date %}
-    <p><b>Termin:</b> 
-      {% if start_date and end_date %}
-        {{ start_date.strftime('%d.%m.%Y') }} - {{ end_date.strftime('%d.%m.%Y') }}
-      {% elif start_date %}
-        {{ start_date.strftime('%d.%m.%Y') }}
-      {% endif %}
-    </p>
-  {% endif %}
-  
-  {% if fights_list %}
-    <p style="margin-top: 16px; margin-bottom: 12px; color: #666;"><b>Liczba pojedynków:</b> {{ fights_list|length }}</p>
-    
-    {% for fight in fights_list %}
-      <div style="margin-bottom: 16px; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; {% if fight.is_current_user %}border-color: #0a58ca; background: #e6f4ea;{% endif %}">
-        <div style="font-weight: bold; margin-bottom: 8px; color: #666;">
-          Pojedynek {{ fight.fight_no }}
-          {% if fight.is_finished %}
-            <span style="color: #28a745; margin-left: 8px;">✓ Zakończona</span>
-          {% else %}
-            <span style="color: #ffc107; margin-left: 8px;">⏳ W toku</span>
-          {% endif %}
-        </div>
-        
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 200px;">
-            <div style="color: #dc3545; font-weight: bold;">🔴 {{ fight.red_code }}</div>
-            <div>{{ fight.red_name }}</div>
-            {% if fight.red_country %}
-              <div style="font-size: 0.9em; color: #666;">{{ fight.red_country }}{% if fight.red_club %} - {{ fight.red_club }}{% endif %}</div>
-            {% endif %}
-            {% if fight.red_score is not none %}
-              <div style="margin-top: 4px; font-weight: bold; font-size: 1.2em; color: #dc3545;">
-                {{ fight.red_score }}
-              </div>
-            {% endif %}
-            {% if fight.winner_code == fight.red_code %}
-              <div style="margin-top: 4px; color: #28a745; font-weight: bold;">🏆 Zwycięzca</div>
-            {% endif %}
-          </div>
-          
-          <div style="font-weight: bold; color: #666; font-size: 1.2em;">vs</div>
-          
-          <div style="flex: 1; min-width: 200px;">
-            {% if fight.is_bye %}
-              <div style="color: #666; font-weight: bold;">[BYE]</div>
-              <div style="color: #666; font-style: italic;">Wolny los</div>
-            {% else %}
-              <div style="color: #0a58ca; font-weight: bold;">🔵 {{ fight.blue_code }}</div>
-              <div>{{ fight.blue_name }}</div>
-              {% if fight.blue_country %}
-                <div style="font-size: 0.9em; color: #666;">{{ fight.blue_country }}{% if fight.blue_club %} - {{ fight.blue_club }}{% endif %}</div>
-              {% endif %}
-              {% if fight.blue_score is not none %}
-                <div style="margin-top: 4px; font-weight: bold; font-size: 1.2em; color: #0a58ca;">
-                  {{ fight.blue_score }}
-                </div>
-              {% endif %}
-              {% if fight.winner_code == fight.blue_code %}
-                <div style="margin-top: 4px; color: #28a745; font-weight: bold;">🏆 Zwycięzca</div>
-              {% endif %}
-            {% endif %}
-          </div>
-        </div>
+  <div id="kumite-bracket-container">
+    <div class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Ładowanie...</span>
       </div>
-    {% endfor %}
-  {% else %}
-    <p style="margin-top: 16px; color: #666;">Brak pojedynków w tej kategorii. Uruchom symulację zawodów.</p>
-  {% endif %}
-  
-  <div style="margin-top: 20px;">
-    <a href="{{ url_for('registration.my_registration') }}" style="color: #0a58ca; text-decoration: none;">← Powrót do moich zgłoszeń</a>
+    </div>
   </div>
 </div>
+
+<script src="/static/js/registration.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Extract event_id and category_kumite_id from URL
+    const urlParts = window.location.pathname.split('/');
+    const eventId = parseInt(urlParts[urlParts.length - 2]);
+    const categoryKumiteId = parseInt(urlParts[urlParts.length - 1]);
+    
+    if (eventId && categoryKumiteId) {
+      loadKumiteBracket(eventId, categoryKumiteId);
+    }
+  });
+</script>
 {% endblock %}
-
-
-
-

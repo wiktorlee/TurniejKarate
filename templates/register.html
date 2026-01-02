@@ -1,50 +1,111 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Rejestracja</h1>
-<div class="card">
-  <form method="post">
-    <label>Login</label>
-    <input name="login" required value="{{ form.login if form else '' }}">
+<div class="text-center mb-4">
+  <i class="bi bi-person-plus-fill" style="font-size: 3rem; color: var(--karate-red);"></i>
+  <h1 class="h3 mb-3 fw-normal">Rejestracja</h1>
+</div>
 
-    <label>Hasło</label>
-    <input name="password" required value="{{ form.password if form else '' }}">
+<div class="card mx-auto" style="max-width: 500px;">
+  <form id="register-form">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="login" class="form-label">
+          <i class="bi bi-person"></i> Login
+        </label>
+        <input type="text" class="form-control" id="login" name="login" required>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <label for="password" class="form-label">
+          <i class="bi bi-lock"></i> Hasło
+        </label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+    </div>
 
-    <label>Kod kraju (3 litery, np. POL)</label>
-    <input name="country_code" maxlength="3" required value="{{ form.country_code if form else '' }}">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="country_code" class="form-label">
+          <i class="bi bi-globe"></i> Kod kraju
+        </label>
+        <input type="text" class="form-control" id="country_code" name="country_code" maxlength="3" placeholder="POL" required>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <label for="nationality" class="form-label">
+          <i class="bi bi-flag"></i> Narodowość
+        </label>
+        <input type="text" class="form-control" id="nationality" name="nationality" placeholder="Polska" required>
+      </div>
+    </div>
 
-    <label>Narodowość (np. Polska)</label>
-    <input name="nationality" required value="{{ form.nationality if form else '' }}">
+    <div class="mb-3">
+      <label for="club_name" class="form-label">
+        <i class="bi bi-building"></i> Klub
+      </label>
+      <select class="form-select" id="club_name" name="club_name" required>
+        <option value="">-- Wybierz klub --</option>
+        <!-- Clubs will be populated by JavaScript -->
+      </select>
+    </div>
 
-    <label>Klub</label>
-    <select name="club_name" required>
-      <option value="">-- Wybierz klub --</option>
-      {% for club in clubs %}
-        <option value="{{ club.name }}" {% if form and form.club_name == club.name %}selected{% endif %}>
-          {{ club.name }}{% if club.city %} - {{ club.city }}{% endif %}
-        </option>
-      {% endfor %}
-    </select>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="first_name" class="form-label">
+          <i class="bi bi-person-badge"></i> Imię
+        </label>
+        <input type="text" class="form-control" id="first_name" name="first_name">
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <label for="last_name" class="form-label">
+          <i class="bi bi-person-badge"></i> Nazwisko
+        </label>
+        <input type="text" class="form-control" id="last_name" name="last_name">
+      </div>
+    </div>
 
-    <label>Imię</label>
-    <input name="first_name" value="{{ form.first_name if form else '' }}">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="sex" class="form-label">
+          <i class="bi bi-gender-ambiguous"></i> Płeć
+        </label>
+        <select class="form-select" id="sex" name="sex" required>
+          <option value="">-- Wybierz --</option>
+          <option value="M">Mężczyzna</option>
+          <option value="F">Kobieta</option>
+        </select>
+      </div>
+      
+      <div class="col-md-4 mb-3">
+        <label for="birth_date" class="form-label">
+          <i class="bi bi-calendar"></i> Data urodzenia
+        </label>
+        <input type="date" class="form-control" id="birth_date" name="birth_date" required>
+      </div>
+      
+      <div class="col-md-4 mb-3">
+        <label for="weight" class="form-label">
+          <i class="bi bi-speedometer"></i> Waga (kg)
+        </label>
+        <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+      </div>
+    </div>
 
-    <label>Nazwisko</label>
-    <input name="last_name" value="{{ form.last_name if form else '' }}">
-
-    <label>Płeć (M/F)</label>
-    <input name="sex" maxlength="1" required value="{{ form.sex if form else '' }}">
-
-    <label>Data urodzenia</label>
-    <input type="date" name="birth_date" required value="{{ form.birth_date if form else '' }}">
-
-    <label for="weight">Waga (kg):</label>
-    <input type="number" step="0.1" name="weight" id="weight" required>
-
-
-    <div style="margin-top:12px">
-      <button type="submit">Utwórz konto</button>
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-person-plus"></i> Utwórz konto
+      </button>
     </div>
   </form>
 </div>
-<p style="margin-top:12px">Masz już konto? <a href="{{ url_for('auth.login') }}">Zaloguj się</a>.</p>
+
+<p class="text-center mt-4">
+  Masz już konto? 
+  <a href="/login" class="text-decoration-none" style="color: var(--karate-red);">
+    <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+  </a>
+</p>
+
+<script src="/static/js/auth.js"></script>
 {% endblock %}

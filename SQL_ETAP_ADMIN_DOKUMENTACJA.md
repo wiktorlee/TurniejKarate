@@ -358,3 +358,4 @@ cur.execute(f"SELECT * FROM {SCHEMA}.restore_dummy_athletes_registrations()")
 
 
 
+

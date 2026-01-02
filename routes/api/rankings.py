@@ -1,23 +1,21 @@
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, jsonify
 from collections import defaultdict
 from database import get_conn
 from config import SCHEMA
 
-rankings_bp = Blueprint('rankings', __name__)
+api_rankings_bp = Blueprint('api_rankings', __name__)
 
-@rankings_bp.route("/rankings", methods=["GET"])
-def show_rankings():
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("rankings.html")
 
-def _show_rankings_old():  # Old logic preserved but not used
+# GET /api/rankings - pobierz rankingi
+@api_rankings_bp.get("/api/rankings")
+def get_rankings():
     club_ranking = []
     nation_ranking = []
     individual_ranking = defaultdict(list)
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # 1. Ranking Klubowy (używa widoku)
+            # 1. Ranking Klubowy
             cur.execute(f"""
                 SELECT club_name, SUM(points) as total_points
                 FROM {SCHEMA}.v_results_with_users
@@ -29,7 +27,7 @@ def _show_rankings_old():  # Old logic preserved but not used
             for idx, row in enumerate(club_rows, 1):
                 club_ranking.append({"place": idx, "name": row[0], "points": row[1]})
 
-            # 2. Ranking Narodowościowy (używa widoku)
+            # 2. Ranking Narodowościowy
             cur.execute(f"""
                 SELECT country_code, SUM(points) as total_points
                 FROM {SCHEMA}.v_results_with_users
@@ -41,8 +39,7 @@ def _show_rankings_old():  # Old logic preserved but not used
             for idx, row in enumerate(nation_rows, 1):
                 nation_ranking.append({"place": idx, "name": row[0], "points": row[1]})
 
-            # 3. Ranking Indywidualny per Kategoria (używa widoku)
-            # Pobieramy: Kategorię, Imię, Nazwisko, Klub, Sumę punktów w tej kategorii
+            # 3. Ranking Indywidualny per Kategoria
             cur.execute(f"""
                 SELECT category_name, 
                        first_name, last_name, club_name, country_code,
@@ -53,7 +50,6 @@ def _show_rankings_old():  # Old logic preserved but not used
             """)
             indiv_rows = cur.fetchall()
 
-            # Grupujemy wyniki w Pythonie według kategorii
             for row in indiv_rows:
                 cat_name = row[0]
                 player_data = {
@@ -65,19 +61,20 @@ def _show_rankings_old():  # Old logic preserved but not used
                 }
                 individual_ranking[cat_name].append(player_data)
 
-            # Dodajemy miejsca (1, 2, 3...) wewnątrz każdej kategorii
+            # Dodaj miejsca wewnątrz każdej kategorii
             for cat in individual_ranking:
                 for idx, player in enumerate(individual_ranking[cat], 1):
                     player["place"] = idx
 
+            # Konwertuj defaultdict na dict dla JSON
+            individual_ranking_dict = dict(individual_ranking)
+
+            return jsonify({
+                "club_ranking": club_ranking,
+                "nation_ranking": nation_ranking,
+                "individual_ranking": individual_ranking_dict
+            })
+
     except Exception as e:
-        flash(f"Błąd rankingu: {e}", "error")
-        return redirect(url_for("main.index"))
-
-    return render_template("rankings.html",
-                         club_ranking=club_ranking,
-                         nation_ranking=nation_ranking,
-                         individual_ranking=individual_ranking)
-
-
+        return jsonify({"error": f"Błąd rankingu: {e}"}), 500
 

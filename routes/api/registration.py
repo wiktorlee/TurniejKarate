@@ -1,27 +1,23 @@
-from flask import Blueprint, request, render_template, redirect, url_for, session, flash
+from flask import Blueprint, request, jsonify, session
 from database import get_conn
 from config import SCHEMA
 
-registration_bp = Blueprint('registration', __name__)
+api_registration_bp = Blueprint('api_registration', __name__)
 
 
-#Moje zgłoszenie
-@registration_bp.get("/my-registration")
-def my_registration():
+# GET /api/my-registration - pobierz moje zgłoszenia
+@api_registration_bp.get("/api/my-registration")
+def get_my_registration():
     uid = session.get("user_id")
     if not uid:
-        return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("my_registration.html")
+        return jsonify({"error": "Musisz być zalogowany, aby zobaczyć swoje zgłoszenie."}), 401
 
-def _my_registration_old():  # Old logic preserved but not used
     try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
             row = cur.fetchone()
             if not row or not row[0]:
-                flash("Nie masz przypisanego kodu zawodnika.", "error")
-                return redirect(url_for("profile.profile"))
+                return jsonify({"error": "Nie masz przypisanego kodu zawodnika."}), 400
             athlete_code = row[0]
 
             sql = f"""
@@ -39,10 +35,9 @@ def _my_registration_old():  # Old logic preserved but not used
             for row in rows:
                 reg_id, event_id, category_kata_id, category_kumite_id = row[0], row[1], row[2], row[3]
                 
-                # Pobierz wyniki dla Kata (jeśli istnieje)
+                # Pobierz wyniki dla Kata
                 kata_result = None
                 if category_kata_id:
-                    # Pobierz nazwę kategorii Kata
                     cur.execute(f"""
                         SELECT name FROM {SCHEMA}.categories_kata WHERE id = %s
                     """, (category_kata_id,))
@@ -61,10 +56,9 @@ def _my_registration_old():  # Old logic preserved but not used
                         if kata_row:
                             kata_result = {"place": kata_row[0], "points": kata_row[1]}
                 
-                # Pobierz wyniki dla Kumite (jeśli istnieje)
+                # Pobierz wyniki dla Kumite
                 kumite_result = None
                 if category_kumite_id:
-                    # Pobierz nazwę kategorii Kumite
                     cur.execute(f"""
                         SELECT name FROM {SCHEMA}.categories_kumite WHERE id = %s
                     """, (category_kumite_id,))
@@ -89,157 +83,131 @@ def _my_registration_old():  # Old logic preserved but not used
                     "category_kata_id": category_kata_id,
                     "category_kumite_id": category_kumite_id,
                     "event_name": row[4],
-                    "start_date": row[5],
-                    "end_date": row[6],
+                    "start_date": row[5].isoformat() if row[5] else None,
+                    "end_date": row[6].isoformat() if row[6] else None,
                     "kata_name": row[7],
                     "kumite_name": row[8],
                     "kata_result": kata_result,
                     "kumite_result": kumite_result
                 })
 
-            return render_template("my_registration.html", registrations=registrations)
+            return jsonify({"registrations": registrations})
     except Exception as e:
-        flash(f"Błąd podczas pobierania zgłoszenia: {e}", "error")
-        return redirect(url_for("profile.profile"))
+        return jsonify({"error": f"Błąd podczas pobierania zgłoszenia: {e}"}), 500
 
 
-#Wycofanie całego zgłoszenia (moved to API)
-@registration_bp.post("/withdraw")
+# DELETE /api/withdraw - wycofaj całkowicie zgłoszenie
+@api_registration_bp.delete("/api/withdraw")
 def withdraw():
-    # POST handling moved to API - redirect to my-registration
-    return redirect(url_for("registration.my_registration"))
-
-def _withdraw_old():  # Old logic preserved but not used
     uid = session.get("user_id")
-    registration_id = request.form.get("registration_id")
+    if not uid:
+        return jsonify({"error": "Brak sesji."}), 401
+
+    data = request.get_json()
+    registration_id = data.get("registration_id")
     if not registration_id:
-        flash("Brak ID zgłoszenia.", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": "Brak ID zgłoszenia."}), 400
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # Weryfikacja właściciela zgłoszenia
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
             row = cur.fetchone()
             if not row or not row[0]:
-                flash("Nie masz przypisanego kodu zawodnika.", "error")
-                return redirect(url_for("profile.profile"))
+                return jsonify({"error": "Nie masz przypisanego kodu zawodnika."}), 400
             athlete_code = row[0]
 
-            # Weryfikacja przynależności rejestracji
+            # Weryfikacja przynależności
             cur.execute(f"SELECT id FROM {SCHEMA}.registrations WHERE id = %s AND athlete_code = %s", (registration_id, athlete_code))
             reg = cur.fetchone()
             if not reg:
-                flash("Nie znaleziono zgłoszenia lub nie masz uprawnień do jego usunięcia.", "error")
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"error": "Nie znaleziono zgłoszenia lub nie masz uprawnień do jego usunięcia."}), 403
 
             cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s AND athlete_code = %s", (registration_id, athlete_code))
             conn.commit()
-            flash("Twoje zgłoszenie zostało wycofane.", "success")
-            return redirect(url_for("registration.my_registration"))
-
+            return jsonify({"success": True, "message": "Twoje zgłoszenie zostało wycofane."})
     except Exception as e:
-        flash(f"Błąd podczas wycofywania zgłoszenia: {e}", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": f"Błąd podczas wycofywania zgłoszenia: {e}"}), 500
 
 
-#Wycofanie pojedynczej dyscypliny (moved to API)
-@registration_bp.post("/withdraw-discipline")
+# DELETE /api/withdraw-discipline - wycofaj pojedynczą dyscyplinę
+@api_registration_bp.delete("/api/withdraw-discipline")
 def withdraw_discipline():
-    # POST handling moved to API - redirect to my-registration
-    return redirect(url_for("registration.my_registration"))
-
-def _withdraw_discipline_old():  # Old logic preserved but not used
     uid = session.get("user_id")
-    registration_id = request.form.get("registration_id")
-    discipline_type = request.form.get("discipline_type")
+    if not uid:
+        return jsonify({"error": "Brak sesji."}), 401
+
+    data = request.get_json()
+    registration_id = data.get("registration_id")
+    discipline_type = data.get("discipline_type")
     
     if not registration_id:
-        flash("Brak ID zgłoszenia.", "error")
-        return redirect(url_for("registration.my_registration"))
-    
+        return jsonify({"error": "Brak ID zgłoszenia."}), 400
     if discipline_type not in ("kata", "kumite"):
-        flash("Nieprawidłowy typ dyscypliny.", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": "Nieprawidłowy typ dyscypliny."}), 400
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
             row = cur.fetchone()
             if not row or not row[0]:
-                flash("Nie masz przypisanego kodu zawodnika.", "error")
-                return redirect(url_for("profile.profile"))
+                return jsonify({"error": "Nie masz przypisanego kodu zawodnika."}), 400
             athlete_code = row[0]
 
             # Weryfikacja istnienia zgłoszenia
             cur.execute(f"SELECT id, category_kata_id, category_kumite_id FROM {SCHEMA}.registrations WHERE id = %s AND athlete_code = %s", (registration_id, athlete_code))
             reg = cur.fetchone()
             if not reg:
-                flash("Nie masz aktywnego zgłoszenia lub nie masz uprawnień.", "error")
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"error": "Nie masz aktywnego zgłoszenia lub nie masz uprawnień."}), 403
 
             reg_id, kata_id, kumite_id = reg
 
-            # Usuwanie wybranej dyscypliny
             try:
                 conn.execute("BEGIN")
                 
                 if discipline_type == "kata":
                     if not kata_id:
                         conn.rollback()
-                        flash("Nie jesteś zapisany do Kata w tym zgłoszeniu.", "error")
-                        return redirect(url_for("registration.my_registration"))
-                    # Usuwanie zgłoszenia przy ostatniej dyscyplinie
+                        return jsonify({"error": "Nie jesteś zapisany do Kata w tym zgłoszeniu."}), 400
                     if not kumite_id:
                         cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
-                        flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
+                        message = "Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina)."
                     else:
                         cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kata_id = NULL WHERE id = %s", (reg_id,))
-                        flash("Zostałeś wycofany z Kata.", "success")
+                        message = "Zostałeś wycofany z Kata."
                 else:  # kumite
                     if not kumite_id:
                         conn.rollback()
-                        flash("Nie jesteś zapisany do Kumite w tym zgłoszeniu.", "error")
-                        return redirect(url_for("registration.my_registration"))
-                    # Usuwanie zgłoszenia przy ostatniej dyscyplinie
+                        return jsonify({"error": "Nie jesteś zapisany do Kumite w tym zgłoszeniu."}), 400
                     if not kata_id:
                         cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (reg_id,))
-                        flash("Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina).", "success")
+                        message = "Twoje zgłoszenie zostało wycofane (była to jedyna dyscyplina)."
                     else:
                         cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kumite_id = NULL WHERE id = %s", (reg_id,))
-                        flash("Zostałeś wycofany z Kumite.", "success")
+                        message = "Zostałeś wycofany z Kumite."
 
                 conn.commit()
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"success": True, "message": message})
             except Exception as e:
                 conn.rollback()
-                flash(f"Błąd podczas wycofywania dyscypliny: {e}", "error")
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"error": f"Błąd podczas wycofywania dyscypliny: {e}"}), 500
 
     except Exception as e:
-        flash(f"Błąd podczas wycofywania dyscypliny: {e}", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": f"Błąd podczas wycofywania dyscypliny: {e}"}), 500
 
 
-#Lista zawodników Kata
-@registration_bp.get("/kata/competitors/<int:event_id>/<int:category_kata_id>")
+# GET /api/kata/competitors/<event_id>/<category_kata_id> - lista zawodników Kata
+@api_registration_bp.get("/api/kata/competitors/<int:event_id>/<int:category_kata_id>")
 def kata_competitors(event_id, category_kata_id):
-    """Wyświetla listę zawodników zapisanych do kategorii Kata."""
     uid = session.get("user_id")
     if not uid:
-        return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("kata_competitors.html")
-
-def _kata_competitors_old():  # Old logic preserved but not used
+        return jsonify({"error": "Musisz być zalogowany."}), 401
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # Pobierz athlete_code użytkownika (do wyróżnienia w liście)
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
             user_row = cur.fetchone()
             user_athlete_code = user_row[0] if user_row and user_row[0] else None
             
-            # Pobierz informacje o evencie i kategorii z widoku
             cur.execute(f"""
                 SELECT DISTINCT event_name, event_start_date, event_end_date, category_name
                 FROM {SCHEMA}.v_kata_competitors
@@ -248,12 +216,10 @@ def _kata_competitors_old():  # Old logic preserved but not used
             """, (event_id, category_kata_id))
             event_cat = cur.fetchone()
             if not event_cat:
-                flash("Nie znaleziono eventu lub kategorii.", "error")
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"error": "Nie znaleziono eventu lub kategorii."}), 404
             
             event_name, start_date, end_date, category_name = event_cat
             
-            # Pobierz listę zawodników z widoku (z wynikami)
             cur.execute(f"""
                 SELECT athlete_code, first_name, last_name, 
                        country_code, club_name, nationality,
@@ -266,7 +232,6 @@ def _kata_competitors_old():  # Old logic preserved but not used
             """, (event_id, category_kata_id))
             competitors = cur.fetchall()
             
-            # Formatuj dane
             competitors_list = []
             for row in competitors:
                 is_current_user = (row[0] == user_athlete_code)
@@ -277,42 +242,36 @@ def _kata_competitors_old():  # Old logic preserved but not used
                     "country_code": row[3],
                     "club_name": row[4] or "",
                     "nationality": row[5] or "",
-                    "place": row[6],  # może być None
-                    "points": row[7],  # może być None
+                    "place": row[6],
+                    "points": row[7],
                     "is_current_user": is_current_user
                 })
             
-            return render_template("kata_competitors.html",
-                                 event_name=event_name,
-                                 category_name=category_name,
-                                 start_date=start_date,
-                                 end_date=end_date,
-                                 competitors=competitors_list,
-                                 event_id=event_id)
+            return jsonify({
+                "event_name": event_name,
+                "category_name": category_name,
+                "start_date": start_date.isoformat() if start_date else None,
+                "end_date": end_date.isoformat() if end_date else None,
+                "competitors": competitors_list,
+                "event_id": event_id
+            })
     except Exception as e:
-        flash(f"Błąd podczas pobierania listy zawodników: {e}", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": f"Błąd podczas pobierania listy zawodników: {e}"}), 500
 
 
-#Drzewko walk Kumite
-@registration_bp.get("/kumite/bracket/<int:event_id>/<int:category_kumite_id>")
+# GET /api/kumite/bracket/<event_id>/<category_kumite_id> - drzewko walk Kumite
+@api_registration_bp.get("/api/kumite/bracket/<int:event_id>/<int:category_kumite_id>")
 def kumite_bracket(event_id, category_kumite_id):
-    """Wyświetla drzewko walk dla kategorii Kumite."""
     uid = session.get("user_id")
     if not uid:
-        return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("kumite_bracket.html")
-
-def _kumite_bracket_old():  # Old logic preserved but not used
+        return jsonify({"error": "Musisz być zalogowany."}), 401
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # Pobierz athlete_code użytkownika
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
             user_row = cur.fetchone()
             user_athlete_code = user_row[0] if user_row and user_row[0] else None
             
-            # Pobierz informacje o evencie i kategorii z widoku
             cur.execute(f"""
                 SELECT DISTINCT event_name, event_start_date, event_end_date, category_name
                 FROM {SCHEMA}.v_kumite_competitors
@@ -321,12 +280,11 @@ def _kumite_bracket_old():  # Old logic preserved but not used
             """, (event_id, category_kumite_id))
             event_cat = cur.fetchone()
             if not event_cat:
-                flash("Nie znaleziono eventu lub kategorii.", "error")
-                return redirect(url_for("registration.my_registration"))
+                return jsonify({"error": "Nie znaleziono eventu lub kategorii."}), 404
             
             event_name, start_date, end_date, category_name = event_cat
             
-            # Pobierz listę wszystkich zarejestrowanych zawodników z widoku
+            # Pobierz listę zarejestrowanych zawodników
             cur.execute(f"""
                 SELECT athlete_code
                 FROM {SCHEMA}.v_kumite_competitors
@@ -334,14 +292,14 @@ def _kumite_bracket_old():  # Old logic preserved but not used
             """, (event_id, category_kumite_id))
             registered_athletes = set(row[0] for row in cur.fetchall())
             
-            # Sprawdź czy istnieją pojedynki dla tej kategorii
+            # Sprawdź czy istnieją pojedynki
             cur.execute(f"""
                 SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
                 WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
             """, (category_kumite_id, event_id))
             fights_count = cur.fetchone()[0]
             
-            # Pobierz listę zawodników w drzewku (jeśli istnieje)
+            # Pobierz listę zawodników w drzewku
             athletes_in_bracket = set()
             if fights_count > 0:
                 cur.execute(f"""
@@ -350,14 +308,13 @@ def _kumite_bracket_old():  # Old logic preserved but not used
                     WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
                 """, (category_kumite_id, event_id))
                 for row in cur.fetchall():
-                    if row[0]:  # red_code
+                    if row[0]:
                         athletes_in_bracket.add(row[0])
-                    if row[1]:  # blue_code
+                    if row[1]:
                         athletes_in_bracket.add(row[1])
             
-            # Jeśli brak pojedynków LUB zawodnicy w drzewku nie pasują do zarejestrowanych, wygeneruj/odśwież drzewka
+            # Wygeneruj/odśwież drzewka jeśli potrzeba
             if fights_count == 0 or registered_athletes != athletes_in_bracket:
-                # Usuń stare drzewka jeśli istnieją
                 if fights_count > 0:
                     cur.execute(f"""
                         DELETE FROM {SCHEMA}.draw_fight 
@@ -365,17 +322,15 @@ def _kumite_bracket_old():  # Old logic preserved but not used
                     """, (category_kumite_id, event_id))
                     conn.commit()
                 
-                # Wygeneruj nowe drzewka
                 if len(registered_athletes) >= 2:
                     _generate_kumite_bracket(conn, cur, event_id, category_kumite_id)
-                    # Po wygenerowaniu, pobierz ponownie liczbę
                     cur.execute(f"""
                         SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
                         WHERE category_kumite_id = %s AND event_id = %s AND round_no = 1
                     """, (category_kumite_id, event_id))
                     fights_count = cur.fetchone()[0]
             
-            # Pobierz wszystkie rundy bezpośrednio z draw_fight (z wynikami)
+            # Pobierz wszystkie rundy
             cur.execute(f"""
                 SELECT df.round_no, df.fight_no, df.red_code, df.blue_code,
                        COALESCE(red_u.first_name, '') as red_first, 
@@ -396,7 +351,6 @@ def _kumite_bracket_old():  # Old logic preserved but not used
             """, (category_kumite_id, event_id))
             fights = cur.fetchall()
             
-            # Utwórz płaską listę walk (szablon oczekuje fights_list)
             fights_list = []
             for row in fights:
                 fight_no, red_code, blue_code = row[1], row[2], row[3]
@@ -412,33 +366,29 @@ def _kumite_bracket_old():  # Old logic preserved but not used
                     "blue_name": f"{row[8] or ''} {row[9] or ''}".strip() if row[8] or row[9] else "BYE",
                     "blue_country": row[10] or "",
                     "blue_club": row[11] or "",
-                    "winner_code": row[12],  # może być None
-                    "red_score": row[13],  # może być None
-                    "blue_score": row[14],  # może być None
+                    "winner_code": row[12],
+                    "red_score": row[13],
+                    "blue_score": row[14],
                     "is_finished": row[15] if row[15] is not None else False,
                     "is_bye": (blue_code is None),
                     "is_current_user": is_user_in_fight
                 })
             
-            return render_template("kumite_bracket.html",
-                                 event_name=event_name,
-                                 category_name=category_name,
-                                 start_date=start_date,
-                                 end_date=end_date,
-                                 fights_list=fights_list,
-                                 event_id=event_id,
-                                 category_kumite_id=category_kumite_id)
+            return jsonify({
+                "event_name": event_name,
+                "category_name": category_name,
+                "start_date": start_date.isoformat() if start_date else None,
+                "end_date": end_date.isoformat() if end_date else None,
+                "fights_list": fights_list,
+                "event_id": event_id,
+                "category_kumite_id": category_kumite_id
+            })
     except Exception as e:
-        flash(f"Błąd podczas pobierania drzewka walk: {e}", "error")
-        return redirect(url_for("registration.my_registration"))
+        return jsonify({"error": f"Błąd podczas pobierania drzewka walk: {e}"}), 500
 
 
 def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
-    """
-    Funkcja pomocnicza do generowania drzewka walk.
-    Losowo przydziela zawodników do pojedynków.
-    """
-    # Pobierz zawodników zapisanych do kategorii z widoku - LOSOWO
+    """Funkcja pomocnicza do generowania drzewka walk."""
     cur.execute(f"""
         SELECT athlete_code
         FROM {SCHEMA}.v_kumite_competitors
@@ -450,14 +400,9 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     if len(athletes) < 2:
         raise ValueError("Za mało zawodników do utworzenia drzewka (min. 2)")
     
-    # Losowanie odbywa się już w SQL (ORDER BY RANDOM()), nie trzeba shuffle
-    
-    # Jeśli nieparzysta liczba, ostatni zawodnik dostaje BYE
     if len(athletes) % 2 != 0:
-        athletes.append(None)  # None oznacza BYE
+        athletes.append(None)
     
-    # Utwórz pary i wstaw do draw_fight
-    # category_id jest wymagane (NOT NULL), więc używamy category_kumite_id jako wartości
     try:
         conn.execute("BEGIN")
         
@@ -477,3 +422,4 @@ def _generate_kumite_bracket(conn, cur, event_id, category_kumite_id):
     except Exception as e:
         conn.rollback()
         raise
+

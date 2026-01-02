@@ -10,11 +10,9 @@ registration_bp = Blueprint('registration', __name__)
 def my_registration():
     uid = session.get("user_id")
     if not uid:
+        flash("Musisz być zalogowany, aby zobaczyć swoje zgłoszenie.", "error")
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("my_registration.html")
 
-def _my_registration_old():  # Old logic preserved but not used
     try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT athlete_code FROM {SCHEMA}.users WHERE id = %s", (uid,))
@@ -103,14 +101,14 @@ def _my_registration_old():  # Old logic preserved but not used
         return redirect(url_for("profile.profile"))
 
 
-#Wycofanie całego zgłoszenia (moved to API)
+#Wycofanie całego zgłoszenia (konkretnej rejestracji)
 @registration_bp.post("/withdraw")
 def withdraw():
-    # POST handling moved to API - redirect to my-registration
-    return redirect(url_for("registration.my_registration"))
-
-def _withdraw_old():  # Old logic preserved but not used
     uid = session.get("user_id")
+    if not uid:
+        flash("Brak sesji.", "error")
+        return redirect(url_for("auth.login"))
+
     registration_id = request.form.get("registration_id")
     if not registration_id:
         flash("Brak ID zgłoszenia.", "error")
@@ -143,14 +141,14 @@ def _withdraw_old():  # Old logic preserved but not used
         return redirect(url_for("registration.my_registration"))
 
 
-#Wycofanie pojedynczej dyscypliny (moved to API)
+#Wycofanie pojedynczej dyscypliny
 @registration_bp.post("/withdraw-discipline")
 def withdraw_discipline():
-    # POST handling moved to API - redirect to my-registration
-    return redirect(url_for("registration.my_registration"))
-
-def _withdraw_discipline_old():  # Old logic preserved but not used
     uid = session.get("user_id")
+    if not uid:
+        flash("Brak sesji.", "error")
+        return redirect(url_for("auth.login"))
+
     registration_id = request.form.get("registration_id")
     discipline_type = request.form.get("discipline_type")
     
@@ -224,14 +222,15 @@ def _withdraw_discipline_old():  # Old logic preserved but not used
 #Lista zawodników Kata
 @registration_bp.get("/kata/competitors/<int:event_id>/<int:category_kata_id>")
 def kata_competitors(event_id, category_kata_id):
-    """Wyświetla listę zawodników zapisanych do kategorii Kata."""
+    """
+    Wyświetla listę zawodników zapisanych do kategorii Kata.
+    Weryfikuje czy użytkownik jest zalogowany (nie wymaga zapisu do kategorii).
+    """
     uid = session.get("user_id")
     if not uid:
+        flash("Musisz być zalogowany.", "error")
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("kata_competitors.html")
-
-def _kata_competitors_old():  # Old logic preserved but not used
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
             # Pobierz athlete_code użytkownika (do wyróżnienia w liście)
@@ -297,14 +296,15 @@ def _kata_competitors_old():  # Old logic preserved but not used
 #Drzewko walk Kumite
 @registration_bp.get("/kumite/bracket/<int:event_id>/<int:category_kumite_id>")
 def kumite_bracket(event_id, category_kumite_id):
-    """Wyświetla drzewko walk dla kategorii Kumite."""
+    """
+    Wyświetla drzewko walk dla kategorii Kumite.
+    Automatycznie generuje pojedynki jeśli nie istnieją.
+    """
     uid = session.get("user_id")
     if not uid:
+        flash("Musisz być zalogowany.", "error")
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("kumite_bracket.html")
-
-def _kumite_bracket_old():  # Old logic preserved but not used
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
             # Pobierz athlete_code użytkownika

@@ -7,12 +7,10 @@ rankings_bp = Blueprint('rankings', __name__)
 
 @rankings_bp.route("/rankings", methods=["GET"])
 def show_rankings():
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("rankings.html")
-
-def _show_rankings_old():  # Old logic preserved but not used
     club_ranking = []
     nation_ranking = []
+    # Słownik do rankingu indywidualnego:
+    # Klucz = Nazwa kategorii, Wartość = Lista zawodników
     individual_ranking = defaultdict(list)
 
     try:

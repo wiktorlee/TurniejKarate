@@ -31,10 +31,6 @@ def require_admin(f):
 @require_admin
 def dashboard():
     """Panel główny administratora"""
-    # Data loading moved to API/JS - this route only serves template
-    return render_template("admin/dashboard.html")
-
-def _dashboard_old():  # Old logic preserved but not used
     try:
         with get_conn() as conn, conn.cursor() as cur:
             # Pobierz status systemu
@@ -118,10 +114,7 @@ def restore_dummy_athletes():
 @admin_bp.post("/admin/reset")
 @require_admin
 def reset_system():
-    """Reset systemu (moved to API)"""
-    return redirect(url_for("admin.dashboard"))
-
-def _reset_system_old():  # Old logic preserved but not used
+    """Reset systemu - usuwa wyniki i drzewka, opcjonalnie przywraca rejestracje kukiełek"""
     restore_dummies = request.form.get("restore_dummies") == "true"
     
     try:
@@ -170,10 +163,7 @@ def _reset_system_old():  # Old logic preserved but not used
 @admin_bp.post("/admin/simulate")
 @require_admin
 def simulate_season():
-    """Symulacja przebiegu sezonu (moved to API)"""
-    return redirect(url_for("admin.dashboard"))
-
-def _simulate_season_old():  # Old logic preserved but not used
+    """Symulacja przebiegu sezonu - generuje losowe wyniki dla wszystkich zarejestrowanych zawodników"""
     try:
         with get_conn() as conn, conn.cursor() as cur:
             # Sprawdź czy system nie jest już zasymulowany

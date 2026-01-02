@@ -1,18 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Logowanie</h1>
-<div class="card">
-  <form method="post">
-    <label>Login</label>
-    <input name="login" required>
+<div class="text-center mb-4">
+  <i class="bi bi-shield-lock-fill" style="font-size: 3rem; color: var(--karate-red);"></i>
+  <h1 class="h3 mb-3 fw-normal">Logowanie</h1>
+</div>
 
-    <label>Hasło</label>
-    <input name="password" required>
+<div class="card mx-auto" style="max-width: 400px;">
+  <form id="login-form">
+    <div class="mb-3">
+      <label for="login" class="form-label">
+        <i class="bi bi-person"></i> Login
+      </label>
+      <input type="text" class="form-control" id="login" name="login" placeholder="Wprowadź login" required autofocus>
+    </div>
 
-    <div style="margin-top:12px">
-      <button type="submit">Zaloguj</button>
+    <div class="mb-3">
+      <label for="password" class="form-label">
+        <i class="bi bi-lock"></i> Hasło
+      </label>
+      <input type="password" class="form-control" id="password" name="password" placeholder="Wprowadź hasło" required>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+      </button>
     </div>
   </form>
 </div>
-<p style="margin-top:12px">Nie masz konta? <a href="{{ url_for('auth.register') }}">Zarejestruj się</a>.</p>
+
+<p class="text-center mt-4">
+  Nie masz konta? 
+  <a href="/register" class="text-decoration-none" style="color: var(--karate-red);">
+    <i class="bi bi-person-plus"></i> Zarejestruj się
+  </a>
+</p>
+
+<script src="/static/js/auth.js"></script>
 {% endblock %}

@@ -4,88 +4,50 @@
 <p>Wybierz event, dyscyplinę i kategorię, do której chcesz się zapisać.</p>
 
 <div class="card">
-  <form method="post" id="registrationForm">
-    <label for="event_select">Event:</label>
-    <select name="event_id" id="event_select" required>
-      <option value="">-- Wybierz event --</option>
-      {% for event in events %}
-        <option value="{{ event.id }}">{{ event.name }}</option>
-      {% endfor %}
-    </select>
+  <form id="registration-form">
+    <div class="mb-3">
+      <label for="event_select" class="form-label">Event:</label>
+      <select class="form-select" id="event_select" name="event_id" required>
+        <option value="">-- Wybierz event --</option>
+        <!-- Events will be populated by JavaScript -->
+      </select>
+    </div>
 
-    <div style="margin-top:16px">
-      <label>Dyscypliny:</label>
-      <div style="margin-top:8px">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" name="discipline_kata" id="discipline_kata" onchange="toggleKataCategories()">
-          <span>Kata</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px">
-          <input type="checkbox" name="discipline_kumite" id="discipline_kumite" onchange="toggleKumiteCategories()">
-          <span>Kumite</span>
-        </label>
+    <div class="mb-3">
+      <label class="form-label">Dyscypliny:</label>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="discipline_kata" name="discipline_kata">
+        <label class="form-check-label" for="discipline_kata">Kata</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="discipline_kumite" name="discipline_kumite">
+        <label class="form-check-label" for="discipline_kumite">Kumite</label>
       </div>
     </div>
 
-    <div id="kata_section" style="margin-top:16px;display:none">
-      <label for="category_kata_select">Kategoria Kata:</label>
-      <select name="category_kata_id" id="category_kata_select">
+    <div id="kata_section" style="display:none" class="mb-3">
+      <label for="category_kata_select" class="form-label">Kategoria Kata:</label>
+      <select class="form-select" id="category_kata_select" name="category_kata_id">
         <option value="">-- Wybierz kategorię --</option>
-        {% for category in categories_kata %}
-          <option value="{{ category.id }}">{{ category.name }}</option>
-        {% endfor %}
+        <!-- Kata categories will be populated by JavaScript -->
       </select>
     </div>
 
-    <div id="kumite_section" style="margin-top:16px;display:none">
-      <label for="category_kumite_select">Kategoria Kumite:</label>
-      <select name="category_kumite_id" id="category_kumite_select">
+    <div id="kumite_section" style="display:none" class="mb-3">
+      <label for="category_kumite_select" class="form-label">Kategoria Kumite:</label>
+      <select class="form-select" id="category_kumite_select" name="category_kumite_id">
         <option value="">-- Wybierz kategorię --</option>
-        {% for category in categories_kumite %}
-          <option value="{{ category.id }}">{{ category.name }}</option>
-        {% endfor %}
+        <!-- Kumite categories will be populated by JavaScript -->
       </select>
     </div>
 
-    <div style="margin-top:16px">
-      <button type="submit">Zapisz się</button>
-    </div>
+    <button type="submit" class="btn btn-primary">Zapisz się</button>
   </form>
 </div>
 
-{% if has_registration %}
-<p style="margin-top:12px">
-  Masz już zgłoszenie. Możesz je zobaczyć lub zmienić w <a href="{{ url_for('registration.my_registration') }}">Moje zgłoszenie</a>.
+<p id="has-registration-info" style="margin-top:12px; display:none;">
+  Masz już zgłoszenie. Możesz je zobaczyć lub zmienić w <a href="/my-registration">Moje zgłoszenie</a>.
 </p>
-{% endif %}
 
-<script>
-function toggleKataCategories() {
-  const checkbox = document.getElementById('discipline_kata');
-  const section = document.getElementById('kata_section');
-  const select = document.getElementById('category_kata_select');
-  if (checkbox.checked) {
-    section.style.display = 'block';
-    select.required = true;
-  } else {
-    section.style.display = 'none';
-    select.required = false;
-    select.value = '';
-  }
-}
-
-function toggleKumiteCategories() {
-  const checkbox = document.getElementById('discipline_kumite');
-  const section = document.getElementById('kumite_section');
-  const select = document.getElementById('category_kumite_select');
-  if (checkbox.checked) {
-    section.style.display = 'block';
-    select.required = true;
-  } else {
-    section.style.display = 'none';
-    select.required = false;
-    select.value = '';
-  }
-}
-</script>
+<script src="/static/js/categories.js"></script>
 {% endblock %}
