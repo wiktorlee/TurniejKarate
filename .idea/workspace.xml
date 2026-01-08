@@ -5,28 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9f58784-6bfe-47d2-8b0d-8104fdb52216" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/TurniejKarate.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TurniejKarate.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SQL_ETAP_ADMIN_DOKUMENTACJA.md" beforeDir="false" afterPath="$PROJECT_DIR$/SQL_ETAP_ADMIN_DOKUMENTACJA.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/categories.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/categories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/rankings.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/rankings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/registration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/categories.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/categories.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/profile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/rankings.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/rankings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/registration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/categories.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/edit_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/edit_profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/kata_competitors.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/kata_competitors.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/kumite_bracket.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/kumite_bracket.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/my_registration.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/my_registration.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profile.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/rankings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/rankings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +56,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;disable.download.node.interpreter.editor.notification&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/pc/Desktop/studia/SEM 5/Bazy danych/TurniejKarate&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/Desktop/studia/SEM 5/Bazy danych/TurniejKarate&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -74,7 +68,6 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
         <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
