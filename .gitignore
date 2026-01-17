@@ -2,3 +2,5 @@
 __pycache__/
 *.pyc
 .env
+sprawozdanie.tex
+SQL_ETAP_ADMIN_DOKUMENTACJA.md

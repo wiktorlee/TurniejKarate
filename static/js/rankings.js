@@ -55,10 +55,9 @@ function renderClubRanking(clubRanking) {
     
     let rows = '';
     clubRanking.forEach(item => {
-        const medalIcon = item.place === 1 ? '🥇' : item.place === 2 ? '🥈' : item.place === 3 ? '🥉' : '';
         rows += `
             <tr>
-                <td><strong>${item.place}${medalIcon ? ' ' + medalIcon : ''}</strong></td>
+                <td><strong>${item.place}</strong></td>
                 <td>${item.name}</td>
                 <td><strong class="text-danger">${item.points}</strong></td>
             </tr>
@@ -108,10 +107,9 @@ function renderNationRanking(nationRanking) {
     
     let rows = '';
     nationRanking.forEach(item => {
-        const medalIcon = item.place === 1 ? '🥇' : item.place === 2 ? '🥈' : item.place === 3 ? '🥉' : '';
         rows += `
             <tr>
-                <td><strong>${item.place}${medalIcon ? ' ' + medalIcon : ''}</strong></td>
+                <td><strong>${item.place}</strong></td>
                 <td><strong>${item.name}</strong></td>
                 <td><strong class="text-danger">${item.points}</strong></td>
             </tr>
@@ -154,10 +152,9 @@ function renderIndividualRanking(individualRanking) {
         let rows = '';
         
         athletes.forEach(athlete => {
-            const medalIcon = athlete.place === 1 ? '🥇' : athlete.place === 2 ? '🥈' : athlete.place === 3 ? '🥉' : '';
             rows += `
                 <tr>
-                    <td><strong>${athlete.place}${medalIcon ? ' ' + medalIcon : ''}</strong></td>
+                    <td><strong>${athlete.place}</strong></td>
                     <td>${athlete.first_name} ${athlete.last_name}</td>
                     <td>${athlete.club || '-'}</td>
                     <td>${athlete.country || '-'}</td>

@@ -268,28 +268,28 @@ function renderKumiteBracket(data) {
                         <div class="fw-bold mb-2 text-muted">
                             Pojedynek ${fight.fight_no}
                             ${fight.is_finished ? 
-                                '<span class="text-success ms-2">✓ Zakończona</span>' : 
-                                '<span class="text-warning ms-2">⏳ W toku</span>'
+                                '<span class="text-success ms-2">Zakończona</span>' : 
+                                '<span class="text-warning ms-2">W toku</span>'
                             }
                         </div>
                         <div class="d-flex align-items-center gap-3 flex-wrap">
                             <div class="flex-fill">
-                                <div class="text-danger fw-bold">🔴 ${fight.red_code}</div>
+                                <div class="text-danger fw-bold">${fight.red_code}</div>
                                 <div>${fight.red_name}</div>
                                 ${fight.red_country ? `<div class="small text-muted">${fight.red_country}${fight.red_club ? ` - ${fight.red_club}` : ''}</div>` : ''}
                                 ${fight.red_score !== null ? `<div class="fw-bold text-danger mt-1" style="font-size: 1.2em;">${fight.red_score}</div>` : ''}
-                                ${fight.winner_code === fight.red_code ? '<div class="text-success fw-bold mt-1">🏆 Zwycięzca</div>' : ''}
+                                ${fight.winner_code === fight.red_code ? '<div class="text-success fw-bold mt-1">Zwycięzca</div>' : ''}
                             </div>
                             <div class="fw-bold text-muted">vs</div>
                             <div class="flex-fill">
                                 ${fight.is_bye ? 
                                     `<div class="text-muted fw-bold">[BYE]</div>
                                      <div class="text-muted fst-italic">Wolny los</div>` :
-                                    `<div class="text-primary fw-bold">🔵 ${fight.blue_code}</div>
+                                    `<div class="text-primary fw-bold">${fight.blue_code}</div>
                                      <div>${fight.blue_name}</div>
                                      ${fight.blue_country ? `<div class="small text-muted">${fight.blue_country}${fight.blue_club ? ` - ${fight.blue_club}` : ''}</div>` : ''}
                                      ${fight.blue_score !== null ? `<div class="fw-bold text-primary mt-1" style="font-size: 1.2em;">${fight.blue_score}</div>` : ''}
-                                     ${fight.winner_code === fight.blue_code ? '<div class="text-success fw-bold mt-1">🏆 Zwycięzca</div>' : ''}`
+                                     ${fight.winner_code === fight.blue_code ? '<div class="text-success fw-bold mt-1">Zwycięzca</div>' : ''}`
                                 }
                             </div>
                         </div>
