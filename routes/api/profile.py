@@ -14,12 +14,15 @@ def get_profile():
     if not uid:
         return jsonify({"error": "Brak sesji – zaloguj się albo zarejestruj."}), 401
 
-    result = user_service.get_profile(uid)
-    
-    if result.get("error"):
-        return jsonify(result), 404
-    
-    return jsonify(result)
+    try:
+        result = user_service.get_profile(uid)
+        
+        if result.get("error"):
+            return jsonify(result), 404
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"Błąd podczas pobierania profilu: {str(e)}"}), 500
 
 
 # PUT /api/profile - aktualizuj profil użytkownika
@@ -29,11 +32,17 @@ def update_profile():
     if not uid:
         return jsonify({"error": "Brak sesji – zaloguj się albo zarejestruj."}), 401
 
-    data = request.get_json()
-    result = user_service.update_profile(uid, data)
-    
-    if result.get("error"):
-        return jsonify(result), 400
-    
-    return jsonify(result)
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Brak danych w żądaniu"}), 400
+        
+        result = user_service.update_profile(uid, data)
+        
+        if result.get("error"):
+            return jsonify(result), 400
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"Błąd podczas aktualizacji profilu: {str(e)}"}), 500
 

@@ -5,18 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9f58784-6bfe-47d2-8b0d-8104fdb52216" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/TurniejKarate.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TurniejKarate.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SQL_ETAP_ADMIN_DOKUMENTACJA.md" beforeDir="false" afterPath="$PROJECT_DIR$/SQL_ETAP_ADMIN_DOKUMENTACJA.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/rankings.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/rankings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/registration.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/registration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/categories.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/categories.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/user_repository.py" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/user_repository.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api/profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/api.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -132,6 +127,8 @@
       <workItem from="1767357628002" duration="960000" />
       <workItem from="1768321497352" duration="1341000" />
       <workItem from="1768645052307" duration="86000" />
+      <workItem from="1768729663623" duration="630000" />
+      <workItem from="1768994191852" duration="330000" />
     </task>
     <servers />
   </component>
@@ -139,7 +136,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1768645081024" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1768994522565" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TurniejKarate$app.coverage" NAME="app Coverage Results" MODIFIED="1762547494497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

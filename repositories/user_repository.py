@@ -75,6 +75,7 @@ class UserRepository:
                 user_data["birth_date"],
                 user_data["weight"]
             ))
+            conn.commit()
             return cur.fetchone()[0]
     
     def update(self, user_id: int, user_data: dict) -> None:

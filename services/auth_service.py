@@ -39,16 +39,20 @@ class AuthService:
         """
         errors = []
         
-        login = (data.get("login") or "").strip()
-        password = (data.get("password") or "").strip()
-        country = (data.get("country_code") or "").strip().upper()
-        nationality = (data.get("nationality") or "").strip()
-        club_name = (data.get("club_name") or "").strip()
-        first = (data.get("first_name") or "").strip()
-        last = (data.get("last_name") or "").strip()
-        sex = (data.get("sex") or "").strip().upper()
-        birth_raw = (data.get("birth_date") or "").strip()
-        weight_raw = (data.get("weight") or "").strip()
+        login = str(data.get("login") or "").strip()
+        password = str(data.get("password") or "").strip()
+        country = str(data.get("country_code") or "").strip().upper()
+        nationality = str(data.get("nationality") or "").strip()
+        club_name = str(data.get("club_name") or "").strip()
+        first = str(data.get("first_name") or "").strip()
+        last = str(data.get("last_name") or "").strip()
+        sex = str(data.get("sex") or "").strip().upper()
+        birth_raw = str(data.get("birth_date") or "").strip()
+        weight_raw = data.get("weight")
+        if weight_raw is not None:
+            weight_raw = str(weight_raw).strip()
+        else:
+            weight_raw = ""
         
         # Walidacja
         if not login:
