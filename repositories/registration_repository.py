@@ -47,17 +47,19 @@ class RegistrationRepository:
     
     def create(self, athlete_code: str, event_id: int, discipline_id: Optional[int], 
                category_kata_id: Optional[int], category_kumite_id: Optional[int]) -> None:
-        """
-        Tworzy nową rejestrację.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Tworzy nową rejestrację."""
         with get_conn() as conn, conn.cursor() as cur:
-            cur.execute(f"""
-                INSERT INTO {SCHEMA}.registrations 
-                (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                cur.execute(f"""
+                    INSERT INTO {SCHEMA}.registrations 
+                    (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (athlete_code, event_id, discipline_id, category_kata_id, category_kumite_id))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
     
     def create_with_transaction(self, conn, cur, athlete_code: str, event_id: int, 
                                 discipline_id: Optional[int], category_kata_id: Optional[int], 
@@ -101,41 +103,47 @@ class RegistrationRepository:
     
     def update(self, registration_id: int, discipline_id: Optional[int], 
                category_kata_id: Optional[int], category_kumite_id: Optional[int]) -> None:
-        """
-        Aktualizuje rejestrację.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Aktualizuje rejestrację."""
         with get_conn() as conn, conn.cursor() as cur:
-            cur.execute(f"""
-                UPDATE {SCHEMA}.registrations
-                SET discipline_id = %s, category_kata_id = %s, category_kumite_id = %s
-                WHERE id = %s
-            """, (discipline_id, category_kata_id, category_kumite_id, registration_id))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                cur.execute(f"""
+                    UPDATE {SCHEMA}.registrations
+                    SET discipline_id = %s, category_kata_id = %s, category_kumite_id = %s
+                    WHERE id = %s
+                """, (discipline_id, category_kata_id, category_kumite_id, registration_id))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
     
     def update_discipline(self, registration_id: int, discipline_type: str) -> None:
-        """
-        Aktualizuje pojedynczą dyscyplinę w rejestracji (ustawia NULL).
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Aktualizuje pojedynczą dyscyplinę w rejestracji (ustawia NULL)."""
         with get_conn() as conn, conn.cursor() as cur:
-            if discipline_type == "kata":
-                cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kata_id = NULL WHERE id = %s", (registration_id,))
-            else:  # kumite
-                cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kumite_id = NULL WHERE id = %s", (registration_id,))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                if discipline_type == "kata":
+                    cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kata_id = NULL WHERE id = %s", (registration_id,))
+                else:  # kumite
+                    cur.execute(f"UPDATE {SCHEMA}.registrations SET category_kumite_id = NULL WHERE id = %s", (registration_id,))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
     
     def delete(self, registration_id: int, athlete_code: Optional[str] = None) -> None:
-        """
-        Usuwa rejestrację.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Usuwa rejestrację."""
         with get_conn() as conn, conn.cursor() as cur:
-            if athlete_code:
-                cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s AND athlete_code = %s", (registration_id, athlete_code))
-            else:
-                cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (registration_id,))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                if athlete_code:
+                    cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s AND athlete_code = %s", (registration_id, athlete_code))
+                else:
+                    cur.execute(f"DELETE FROM {SCHEMA}.registrations WHERE id = %s", (registration_id,))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
     
     def find_by_athlete_code_view(self, athlete_code: str) -> List[Tuple]:
         """

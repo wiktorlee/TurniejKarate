@@ -40,16 +40,18 @@ class BracketRepository:
             return athletes
     
     def delete_round(self, category_kumite_id: int, event_id: int, round_no: int = 1) -> None:
-        """
-        Usuwa walki z rundy.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Usuwa walki z rundy."""
         with get_conn() as conn, conn.cursor() as cur:
-            cur.execute(f"""
-                DELETE FROM {SCHEMA}.draw_fight 
-                WHERE category_kumite_id = %s AND event_id = %s AND round_no = %s
-            """, (category_kumite_id, event_id, round_no))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                cur.execute(f"""
+                    DELETE FROM {SCHEMA}.draw_fight 
+                    WHERE category_kumite_id = %s AND event_id = %s AND round_no = %s
+                """, (category_kumite_id, event_id, round_no))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
     
     def create_fight(self, conn, cur, category_kumite_id: int, event_id: int, 
                      round_no: int, fight_no: int, red_code: Optional[str], blue_code: Optional[str]) -> None:

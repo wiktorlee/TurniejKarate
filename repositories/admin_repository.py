@@ -114,16 +114,18 @@ class AdminRepository:
             }
     
     def update_system_status(self, status: str) -> None:
-        """
-        Aktualizuje status systemu.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Aktualizuje status systemu."""
         with get_conn() as conn, conn.cursor() as cur:
-            cur.execute(f"""
-                UPDATE {SCHEMA}.system_status 
-                SET status = %s, simulation_date = now(), updated_at = now()
-                WHERE id = (SELECT id FROM {SCHEMA}.system_status ORDER BY id DESC LIMIT 1)
-            """, (status,))
-            conn.commit()
+            conn.execute("BEGIN")
+            try:
+                cur.execute(f"""
+                    UPDATE {SCHEMA}.system_status 
+                    SET status = %s, simulation_date = now(), updated_at = now()
+                    WHERE id = (SELECT id FROM {SCHEMA}.system_status ORDER BY id DESC LIMIT 1)
+                """, (status,))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise
 
 
