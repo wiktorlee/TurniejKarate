@@ -3,17 +3,10 @@ from config import SCHEMA
 from typing import Dict, List, Tuple, Optional
 
 class AdminRepository:
-    """
-    Repozytorium dla operacji admina.
-    Wszystkie zapytania SQL IDENTYCZNE jak wcześniej!
-    Procedury SQL z Supabase - BEZ ZMIAN!
-    """
+    """Repozytorium dla operacji admina"""
     
     def get_system_status(self) -> Dict:
-        """
-        Pobiera status systemu.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Pobiera status systemu."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"""
                 SELECT status, simulation_date, reset_date, updated_at
@@ -29,10 +22,7 @@ class AdminRepository:
             }
     
     def get_statistics(self) -> Dict:
-        """
-        Pobiera statystyki systemu.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Pobiera statystyki systemu."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.users WHERE is_dummy = true")
             dummy_count = cur.fetchone()[0]
@@ -54,36 +44,19 @@ class AdminRepository:
             }
     
     def call_simulate_competitions(self) -> List[Tuple]:
-        """
-        Wywołuje procedurę simulate_competitions() z Supabase.
-        
-        PROCEDURA W SUPABASE - BEZ ZMIAN!
-        Wywołanie IDENTYCZNE jak wcześniej!
-        
-        Zwraca: Lista krotek (message, events_processed, results_created)
-        """
+        """Wywołuje procedurę simulate_competitions(). Zwraca: Lista krotek (message, events_processed, results_created)"""
         with get_conn() as conn, conn.cursor() as cur:
-            # IDENTYCZNE wywołanie procedury z Supabase!
             cur.execute(f"SELECT * FROM {SCHEMA}.simulate_competitions()")
             return cur.fetchall()
     
     def call_restore_dummy_athletes(self) -> List[Tuple]:
-        """
-        Wywołuje procedurę restore_dummy_athletes_registrations() z Supabase.
-        
-        PROCEDURA W SUPABASE - BEZ ZMIAN!
-        Wywołanie IDENTYCZNE jak wcześniej!
-        """
+        """Wywołuje procedurę restore_dummy_athletes_registrations()."""
         with get_conn() as conn, conn.cursor() as cur:
-            # IDENTYCZNE wywołanie procedury z Supabase!
             cur.execute(f"SELECT * FROM {SCHEMA}.restore_dummy_athletes_registrations()")
             return cur.fetchall()
     
     def reset_system(self, restore_dummies: bool) -> Dict:
-        """
-        Resetuje system.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Resetuje system."""
         with get_conn() as conn, conn.cursor() as cur:
             conn.execute("BEGIN")
             

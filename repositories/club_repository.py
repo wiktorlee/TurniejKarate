@@ -3,13 +3,10 @@ from config import SCHEMA
 from typing import List, Dict
 
 class ClubRepository:
-    """Repozytorium dla klubów - wszystkie zapytania SQL identyczne jak wcześniej"""
+    """Repozytorium dla klubów"""
     
     def get_all(self) -> List[Dict]:
-        """
-        Pobiera listę wszystkich klubów.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Pobiera listę wszystkich klubów."""
         try:
             with get_conn() as conn, conn.cursor() as cur:
                 cur.execute(f"SELECT name, city FROM {SCHEMA}.clubs ORDER BY name")
@@ -18,10 +15,7 @@ class ClubRepository:
             return []
     
     def exists(self, club_name: str) -> bool:
-        """
-        Sprawdza czy klub istnieje.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Sprawdza czy klub istnieje."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"SELECT name FROM {SCHEMA}.clubs WHERE name = %s", (club_name,))
             return cur.fetchone() is not None

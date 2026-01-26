@@ -31,26 +31,25 @@ def require_admin(f):
 @require_admin
 def dashboard():
     """Panel główny administratora"""
-    # Data loading moved to API/JS - this route only serves template
     return render_template("admin/dashboard.html")
 
 
 @admin_bp.post("/admin/restore-dummy-athletes")
 @require_admin
 def restore_dummy_athletes():
-    """Wywołuje procedurę SQL do masowej rejestracji kukiełek (moved to API)"""
+    """Wywołuje procedurę SQL do masowej rejestracji kukiełek"""
     return redirect(url_for("admin.dashboard"))
 
 
 @admin_bp.post("/admin/reset")
 @require_admin
 def reset_system():
-    """Reset systemu (moved to API)"""
+    """Reset systemu"""
     return redirect(url_for("admin.dashboard"))
 
 
 @admin_bp.post("/admin/simulate")
 @require_admin
 def simulate_season():
-    """Symulacja przebiegu sezonu (moved to API)"""
+    """Symulacja przebiegu sezonu"""
     return redirect(url_for("admin.dashboard"))

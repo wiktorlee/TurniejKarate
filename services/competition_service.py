@@ -12,10 +12,7 @@ class CompetitionService:
         self.user_repo = UserRepository()
     
     def get_kata_competitors(self, user_id: int, event_id: int, category_kata_id: int) -> Dict:
-        """
-        Pobiera listę zawodników Kata.
-        Używa widoku v_kata_competitors z Supabase - BEZ ZMIAN!
-        """
+        """Pobiera listę zawodników Kata."""
         user_athlete_code = self.user_repo.get_athlete_code(user_id)
         
         event_cat = self.competition_repo.get_kata_event_info(event_id, category_kata_id)
@@ -51,10 +48,7 @@ class CompetitionService:
         }
     
     def get_kumite_bracket(self, user_id: int, event_id: int, category_kumite_id: int) -> Dict:
-        """
-        Pobiera drzewko walk Kumite.
-        Używa widoku v_kumite_competitors z Supabase - BEZ ZMIAN!
-        """
+        """Pobiera drzewko walk Kumite."""
         user_athlete_code = self.user_repo.get_athlete_code(user_id)
         
         event_cat = self.competition_repo.get_kumite_event_info(event_id, category_kumite_id)

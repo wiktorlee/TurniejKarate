@@ -9,10 +9,7 @@ class RankingService:
         self.ranking_repo = RankingRepository()
     
     def get_rankings(self) -> Dict:
-        """
-        Pobiera wszystkie rankingi.
-        Używa widoku v_results_with_users z Supabase - BEZ ZMIAN!
-        """
+        """Pobiera wszystkie rankingi."""
         # 1. Ranking Klubowy
         club_rows = self.ranking_repo.get_club_ranking()
         club_ranking = []

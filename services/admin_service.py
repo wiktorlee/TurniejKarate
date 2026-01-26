@@ -29,15 +29,11 @@ class AdminService:
         }
     
     def simulate_season(self) -> Dict:
-        """
-        Symuluje sezon zawodów.
-        Używa procedury simulate_competitions() z Supabase - BEZ ZMIAN!
-        """
+        """Symuluje sezon zawodów."""
         system_status = self.admin_repo.get_system_status()
         if system_status["status"] == "SIMULATED":
             return {"error": "System jest już w stanie zasymulowanym. Najpierw wykonaj reset."}
         
-        # WYWOŁANIE PROCEDURY Z SUPABASE - IDENTYCZNE!
         results = self.admin_repo.call_simulate_competitions()
         
         if not results:
@@ -70,10 +66,7 @@ class AdminService:
         return {"success": True, "message": msg}
     
     def restore_dummy_athletes(self) -> Dict:
-        """
-        Przywraca rejestracje kukiełek.
-        Używa procedury restore_dummy_athletes_registrations() z Supabase - BEZ ZMIAN!
-        """
+        """Przywraca rejestracje kukiełek."""
         results = self.admin_repo.call_restore_dummy_athletes()
         
         total_registrations = sum(row[2] for row in results if isinstance(row[2], int)) if results else 0

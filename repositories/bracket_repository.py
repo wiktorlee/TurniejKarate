@@ -3,16 +3,10 @@ from config import SCHEMA
 from typing import List, Tuple, Set, Optional
 
 class BracketRepository:
-    """
-    Repozytorium dla drzewek walk (draw_fight).
-    Wszystkie zapytania SQL IDENTYCZNE jak wcześniej!
-    """
+    """Repozytorium dla drzewek walk"""
     
     def count_fights(self, category_kumite_id: int, event_id: int, round_no: int = 1) -> int:
-        """
-        Liczy walki w rundzie.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Liczy walki w rundzie."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"""
                 SELECT COUNT(*) FROM {SCHEMA}.draw_fight 
@@ -21,10 +15,7 @@ class BracketRepository:
             return cur.fetchone()[0]
     
     def get_athletes_in_bracket(self, category_kumite_id: int, event_id: int, round_no: int = 1) -> Set[str]:
-        """
-        Pobiera listę zawodników w drzewku.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Pobiera listę zawodników w drzewku."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"""
                 SELECT DISTINCT red_code, blue_code
@@ -55,10 +46,7 @@ class BracketRepository:
     
     def create_fight(self, conn, cur, category_kumite_id: int, event_id: int, 
                      round_no: int, fight_no: int, red_code: Optional[str], blue_code: Optional[str]) -> None:
-        """
-        Tworzy walkę w ramach transakcji.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Tworzy walkę w ramach transakcji."""
         cur.execute(f"""
             INSERT INTO {SCHEMA}.draw_fight 
             (category_id, category_kumite_id, event_id, round_no, fight_no, red_code, blue_code)
@@ -66,11 +54,7 @@ class BracketRepository:
         """, (category_kumite_id, category_kumite_id, event_id, round_no, fight_no, red_code, blue_code))
     
     def get_bracket_with_users(self, category_kumite_id: int, event_id: int) -> List[Tuple]:
-        """
-        Pobiera drzewko walk z danymi zawodników.
-        SQL IDENTYCZNE jak wcześniej!
-        Zwraca listę krotek z danymi walk.
-        """
+        """Pobiera drzewko walk z danymi zawodników. Zwraca listę krotek z danymi walk."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"""
                 SELECT df.round_no, df.fight_no, df.red_code, df.blue_code,
@@ -93,10 +77,7 @@ class BracketRepository:
             return cur.fetchall()
     
     def generate_bracket_with_transaction(self, conn, cur, event_id: int, category_kumite_id: int, athletes: List[Optional[str]]) -> None:
-        """
-        Generuje drzewko walk w ramach transakcji (używane gdy transakcja jest już otwarta).
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Generuje drzewko walk w ramach transakcji (używane gdy transakcja jest już otwarta)."""
         if len(athletes) < 2:
             raise ValueError("Za mało zawodników do utworzenia drzewka (min. 2)")
         
@@ -116,10 +97,7 @@ class BracketRepository:
             fight_no += 1
     
     def generate_bracket_transaction(self, event_id: int, category_kumite_id: int, athletes: List[str]) -> None:
-        """
-        Generuje drzewko walk (zarządza transakcją wewnątrz).
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Generuje drzewko walk (zarządza transakcją wewnątrz)."""
         if len(athletes) < 2:
             raise ValueError("Za mało zawodników do utworzenia drzewka (min. 2)")
         

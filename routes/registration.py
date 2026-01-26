@@ -9,21 +9,18 @@ def my_registration():
     uid = session.get("user_id")
     if not uid:
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
     return render_template("my_registration.html")
 
 
-#Wycofanie całego zgłoszenia (moved to API)
+#Wycofanie całego zgłoszenia
 @registration_bp.post("/withdraw")
 def withdraw():
-    # POST handling moved to API - redirect to my-registration
     return redirect(url_for("registration.my_registration"))
 
 
-#Wycofanie pojedynczej dyscypliny (moved to API)
+#Wycofanie pojedynczej dyscypliny
 @registration_bp.post("/withdraw-discipline")
 def withdraw_discipline():
-    # POST handling moved to API - redirect to my-registration
     return redirect(url_for("registration.my_registration"))
 
 
@@ -34,7 +31,6 @@ def kata_competitors(event_id, category_kata_id):
     uid = session.get("user_id")
     if not uid:
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
     return render_template("kata_competitors.html")
 
 
@@ -45,5 +41,4 @@ def kumite_bracket(event_id, category_kumite_id):
     uid = session.get("user_id")
     if not uid:
         return redirect(url_for("auth.login"))
-    # Data loading moved to API/JS - this route only serves template
     return render_template("kumite_bracket.html")

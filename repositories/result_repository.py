@@ -3,13 +3,10 @@ from config import SCHEMA
 from typing import Optional, Dict
 
 class ResultRepository:
-    """Repozytorium dla wyników - wszystkie zapytania SQL identyczne jak wcześniej"""
+    """Repozytorium dla wyników"""
     
     def find_by_athlete_event_category(self, athlete_code: str, event_id: int, category_name: str) -> Optional[Dict]:
-        """
-        Znajduje wynik zawodnika dla eventu i kategorii.
-        SQL IDENTYCZNE jak wcześniej!
-        """
+        """Znajduje wynik zawodnika dla eventu i kategorii."""
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(f"""
                 SELECT place, points
